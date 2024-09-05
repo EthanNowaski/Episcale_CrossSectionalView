@@ -2699,6 +2699,8 @@ growthProgressReinitialize.push_back(   -9999.9);//Cell62
 	int checkForMitosisAndDivision = 250;
 	int checkForOverextension = 500;
 	bool membrAddingNode = false;
+
+	// Uncomment the line below to turn cell proliferation off 
 	// if (1 < 0){
 	if (relaxCount % checkForMitosisAndDivision == 0){
 		if (allocPara_m.currentActiveCellCount < allocPara_m.maxCellCount){
