@@ -36,6 +36,7 @@ ForReadingData_M2 ReadFile_M2(std::string CellCentersFileName) {
 	    ForReadingData1.TempSY.push_back(TempPos_Y);
 	    ForReadingData1.TempSZ.push_back(TempPos_Z);
 		ECellType eCellType=StringToECellTypeConvertor (eCellTypeString) ; 
+		cout << eCellTypeString << endl;
 		ForReadingData1.eCellTypeV.push_back (eCellType) ; 
             }     
          cout << "Cell center positions read successfully";
