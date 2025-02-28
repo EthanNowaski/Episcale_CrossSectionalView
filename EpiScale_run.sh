@@ -5,7 +5,7 @@
 #SBATCH --ntasks=1
 #SBATCH --mem=90G
 #SBATCH --output=Test# This affects the print out of the "std::cout" in the script, make sure this is changed for different jobs.
-#SBATCH --mail-user=enowa001@ucr.edu
+#SBATCH --mail-user="enowa001@ucr.edu"
 #SBATCH --mail-type=ALL
 #SBATCH --job-name="Test"
 #SBATCH -p gpu # This is the default partition, you can use any of the following; intel, batch, highmem, gpu
