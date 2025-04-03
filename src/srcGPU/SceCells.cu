@@ -2282,15 +2282,15 @@ growthProgressReinitialize.push_back(   -9999.9);//Cell62
 		for (uint cellRank = 0; cellRank < allocPara_m.maxCellCount; cellRank++){
 			// Left Boundary Cells
 			if (cellRank >= 65 && cellRank <= 69){
-				cellInfoVecs.Cell_Damp[cellRank] = cellInfoVecs.Cell_Damp[cellRank] * 100;
+				cellInfoVecs.Cell_Damp[cellRank] = cellInfoVecs.Cell_Damp[cellRank] * 1;
 			}
 			// Right Boundary Cells
 			else if (cellRank >= 81 && cellRank <= 85){
-				cellInfoVecs.Cell_Damp[cellRank] = cellInfoVecs.Cell_Damp[cellRank] * 100;
+				cellInfoVecs.Cell_Damp[cellRank] = cellInfoVecs.Cell_Damp[cellRank] * 1;
 			}
 			//Every other Cell
 			else{
-				cellInfoVecs.Cell_Damp[cellRank] = cellInfoVecs.Cell_Damp[cellRank];
+				cellInfoVecs.Cell_Damp[cellRank] = cellInfoVecs.Cell_Damp[cellRank] * 1;
 			}
 			std::cout << "The damping coefficient for cell " << cellRank << " is " << cellInfoVecs.Cell_Damp[cellRank] << std::endl;
 		}
