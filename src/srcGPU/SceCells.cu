@@ -2711,9 +2711,31 @@ growthProgressReinitialize.push_back(   -9999.9);//Cell62
 	cudaEventElapsedTime(&elapsedTime10, start10, start11);
 #endif
 
+// std::cout << "I am before allComponentsMove_M" << std::endl;
+allComponentsMove_M();
+// std::cout << "I am after allComponentsMove_M" << std::endl;
 
-
-	allComponentsMove_M();
+// std::cout<< "I am updating boundary cell nodes with their old coords" << std::endl;
+// for (uint cellRank = 0; cellRank < allocPara_m.maxCellCount; cellRank++){
+	// Left Boundary Cells
+	// if (cellRank >= 65 && cellRank <= 70){
+	//	for (uint targetNode = 0; targetNode < allocPara_m.maxAllNodePerCell; targetNode++){
+	//		nodes->getInfoVecs().nodeLocX[targetNode] = nodes->getInfoVecs().locXOldHost[targetNode];
+	//		nodes->getInfoVecs().nodeLocY[targetNode] = nodes->getInfoVecs().locYOldHost[targetNode];
+	//	}
+	// }
+	// Right Boundary Cells
+	// if (cellRank >= 81 && cellRank <= 86){
+	//	for (uint targetNode = 0; targetNode < allocPara_m.maxAllNodePerCell; targetNode++){
+	//		nodes->getInfoVecs().nodeLocX[targetNode] = nodes->getInfoVecs().locXOldHost[targetNode];
+	//		nodes->getInfoVecs().nodeLocY[targetNode] = nodes->getInfoVecs().locYOldHost[targetNode];
+	//	}
+	// }
+	//Every other Cell
+	// else{
+		
+	// }
+// }
 	// std::cout << "     *** 21 ***" << endl;
 	int checkForMitosisAndDivision = 250;
 	int checkForOverextension = 500;
