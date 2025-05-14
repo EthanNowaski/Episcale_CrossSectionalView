@@ -173,16 +173,6 @@ thrust::device_vector<double> stiffLevel ;
 thrust::device_vector<double> sponLen ;
 };
 
-/*
-class Solver{
-
-	public:
-
-		vector < double> Solver3Diag( const & vector <double> h_ld, const & vector< double> h_d, 
-									  const & vector <double> h_ud, const & vector < double> rhs ) ;  
-}; 
-*/
-
 __device__
 double calMorse_ECM (const double & linkLength); 
 
@@ -352,10 +342,6 @@ struct FindECMNeighborPerCell: public thrust::unary_function<DD,int> {
 }; 
 
 
-
-
-
-
 struct MoveNodes2_Cell: public thrust::unary_function<IIIDDBT,DDIDD> {
 	 double  *_locXAddr_ECM; 
          double  *_locYAddr_ECM; 
@@ -435,12 +421,6 @@ struct MoveNodes2_Cell: public thrust::unary_function<IIIDDBT,DDIDD> {
 				else{
 					fMorse=calMorse_ECM(dist);
 				}
-				// if (_cellGrowthProgress[cellRank] > _mitoticThreshold){
-				// 	fMorse=calMorse_ECM_mitotic(dist, 1.0);
-				// }
-				// else{
-					// fMorse=calMorse_ECM(dist);
-				// }
 				eMorseCell=eMorseCell + calMorseEnergy_ECM(dist);  
 				fTotalMorseX=fTotalMorseX+fMorse*(locX_ECM-locX)/dist ; 
 				fTotalMorseY=fTotalMorseY+fMorse*(locY_ECM-locY)/dist ; 
@@ -468,10 +448,6 @@ struct MoveNodes2_Cell: public thrust::unary_function<IIIDDBT,DDIDD> {
 	 return thrust::make_tuple ((locX+(fTotalMorseX+fAdhMemECMX)*_dt/_Damp_Coef),
 	 							(locY+(fTotalMorseY+fAdhMemECMY)*_dt/_Damp_Coef),
 								 adhPairECM,eMorseCell,eAdhCell )  ; 
-		
-	// return thrust::make_tuple ((locX),
-	 //							(locY),
-	//							 -1,eMorseCell,eAdhCell )  ; 
 }
 	
 
@@ -601,14 +577,6 @@ struct LinSpringForceECM: public thrust::unary_function<IDD,DDDD> {
 		forceRightX=forceRight*(locXRight-locX)/distRight ; 
 		forceRightY=forceRight*(locYRight-locY)/distRight ; 
 	//  }
-	//for open ECM.
-	//	if (index == 0 || index==int(_numNodes/2) ) {
-	//		return thrust::make_tuple(forceRightX,forceRightY,forceRight) ;
-	// }
-	//  else if (index ==_numNodes-1 || index==(int(_numNodes/2)-1) ) {
-	//		return thrust::make_tuple(forceLeftX,forceLeftY,forceLeft) ;
-	//	}
-	//	else {
 	return thrust::make_tuple(forceLeftX+forceRightX,forceLeftY+forceRightY,0.5*(forceLeft+forceRight), energyLeft+energyRight) ;
 //	}
         
@@ -930,11 +898,6 @@ struct CalBendECM: public thrust::unary_function<IDD, DDDDDD> {
 				rightPosY = _locYAddr[index_right];
 				lenRight = sqrt((rightPosX - locX) * (rightPosX - locX) + (rightPosY - locY) * (rightPosY - locY) );
 
-			// if (_isActiveECM[nodeRank]==true && _isActiveECM[index_left]==true && _isActiveECM[index_right]==true){
-			// 	activeTrio = true;
-			// }
-
-
 			// if (activeTrio == true){
 				cosTheta=( (leftPosX-locX)*(rightPosX-locX)+(leftPosY-locY)*(rightPosY-locY) )/(lenRight*lenLeft) ; 
 
@@ -959,8 +922,6 @@ struct CalBendECM: public thrust::unary_function<IDD, DDDDDD> {
 
 	}
 }; 
-
-
 
 
 struct SumBendForce: public thrust::unary_function<IDD,DD> {

@@ -897,23 +897,6 @@ struct ApplyAdh: public thrust::unary_function<BoolIUiDDT, CVec2> {
 			//beta=0.1* 0.5*( _nodeDppAddr[nodeIndx]+ _nodeDppAddr [adhIndx] ) ; 
 			beta=0.0;   
 		}
-
-		/*int maxNodePerCell=680  ; 
-		int cellRank=nodeIndx/maxNodePerCell ;
-		int nodeRank=nodeIndx%maxNodePerCell ;
-		int activeMembCount=600 ; 
-
-		int indexLeft=nodeRank-1;
-		if (indexLeft==-1){
-			indexLeft=activeMembCount-1 ;
-		}
-		indexLeft=indexLeft+cellRank*maxNodePerCell ;
-		int indexRight=nodeRank+1 ;
-		if (indexRight==activeMembCount){
-			indexRight=0 ; 
-		}
-		indexRight=indexRight+cellRank*maxNodePerCell ;
-		*/
 		if (adhIndx == -1 || !isActive) {
 			return thrust::make_tuple(oriVelX, oriVelY);
 		} 
@@ -931,64 +914,6 @@ struct ApplyAdh: public thrust::unary_function<BoolIUiDDT, CVec2> {
 	//	}
 	}
 };
-
-/**
- * calculate force in epithilum.
- */
-/*
-struct ApplyAdhReaction: public thrust::unary_function<BoolUiDD, CVec2> {
-	double* _nodeLocXArrAddr;
-	double* _nodeLocYArrAddr;
-	double* _nodeGrowProAddr;
-	int* _nodeAdhIndx ; 
-	uint _maxTotalNode ; 
-// comment prevents bad formatting issues of __host__ and __device__ in Nsight
-	__host__ __device__
-	ApplyAdhReaction(double* nodeLocXArrAddr, double* nodeLocYArrAddr, double* nodeGrowProAddr, int*nodeAdhIndx,uint maxTotalNode) :
-			_nodeLocXArrAddr(nodeLocXArrAddr), _nodeLocYArrAddr(nodeLocYArrAddr), _nodeGrowProAddr(nodeGrowProAddr),_nodeAdhIndx(nodeAdhIndx),_maxTotalNode(maxTotalNode) {
-	}
-	__device__
-	CVec2 operator()(const BoolUiDD& adhInput2) const {
-		bool isActive = thrust::get<0>(adhInput2);
-		uint nodeIndx = thrust::get<1>(adhInput2);
-		double oriVelX = thrust::get<2>(adhInput2);
-		double oriVelY = thrust::get<3>(adhInput2);
-		//bool adhSkipped = false;	
-		double sumOriVelX= 0 ;
-		double sumOriVelY=0 ; 
-		double oriVelXTmp= 0 ;
-		double oriVelYTmp= 0 ; 
-
-		double growProg = _nodeGrowProAddr[nodeIndx];
-		double locX = _nodeLocXArrAddr[nodeIndx];
-		double locY = _nodeLocYArrAddr[nodeIndx];
-
-		if ( isActive==false) {
-			return thrust::make_tuple(oriVelX, oriVelY);
-		}
-		else {
-			for (int i=0 ; i<_maxTotalNode; i++) {
-				if (_nodeAdhIndx[i] ==nodeIndx) {
-					double growProgNeigh = _nodeGrowProAddr[i];
-					double alpha = getMitoticAdhCoef(growProg, growProgNeigh);//to adjust the mitotic values of stiffness
-					double adhLocX = _nodeLocXArrAddr[i];
-					double adhLocY = _nodeLocYArrAddr[i];
-					handleAdhesionForce_M2(locX, locY, adhLocX, adhLocY,oriVelXTmp, oriVelYTmp, alpha);
-					sumOriVelX=sumOriVelX+oriVelXTmp ; 
-					sumOriVelY=sumOriVelY+oriVelYTmp ;
-					if (_nodeAdhIndx[nodeIndx]==-1){
-						_nodeAdhIndx[nodeIndx]=i ; 
-					}
-					 
-				}
-			}
-			return thrust::make_tuple(sumOriVelX+oriVelX, sumOriVelY+oriVelY);
-
-		}
-	}
-};
-
-*/
 
 struct AddLinkForces: public thrust::unary_function<uint, CVec3> {
 	double* _nodeLocXLinkBeginAddress;

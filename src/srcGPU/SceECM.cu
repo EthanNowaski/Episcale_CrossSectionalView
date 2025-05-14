@@ -80,13 +80,6 @@ double calMorse_ECM_mitotic(const double& linkLength, double scaling ) {
 				* exp(-linkLength / sceInterCell_ECM[2])
 				+ sceInterCell_ECM[1] / sceInterCell_ECM[3]
 						* exp(-linkLength / sceInterCell_ECM[3]));
-		// forceValue = -(1.0+(2.0-1.0)*scaling)*sceInterCell_ECM[0] / sceInterCell_ECM[2]
-		// 		* exp(-linkLength / sceInterCell_ECM[2])
-		// 		+ (1.0+(2.0-1.0)*scaling)*sceInterCell_ECM[1] / sceInterCell_ECM[3]
-		// 				* exp(-linkLength / sceInterCell_ECM[3]);
-//		if (forceValue > 0) {
-//			forceValue = 0;
-//		}
 	}
 
 	return (forceValue) ; 
@@ -106,15 +99,6 @@ double calMorseEnergy_ECM(const double& linkLength ) {
 	return (energyValue) ; 
 }
 
-/*
-__device__
-double calWLC_ECM(const double& linkLength ) {
-
-	double x=linkLength/wLCPara_ECM[0] ;
-	return (wLCPara_ECM[1]*( 6*x+ ( x*x*(3.0-2*x))/( (1-x)*(1-x) ) )
-	       -wLCPara_ECM[2]/pow(linkLength,wLCPara_ECM[3]) ) ; 	
-}
-*/
 __device__
 bool IsValidAdhPair(const double& dist ) {
 		if (dist > restLenECMAdhSpringGPU  && dist < maxLenECMAdhSpringGPU){ 
@@ -163,8 +147,6 @@ EType SceECM:: ConvertStringToEType(string eNodeRead) {
 		return excm ;// To just return something to avoid compiler complain 
 	}
 } 
-
-
 
 SceECM::SceECM() {
 
@@ -250,8 +232,6 @@ else {
 //	readInput_ECM>>mechPara_ECM.wLCParaCPU_ECM[i] ;
 // }    
 
-
-
 std::fstream secondInput_ECM ; 
 std:: string secondInputInfo ;  //dummy 
 std::string secondInputFileName = "./resources/ECM_" + uniqueSymbol + "input.cfg";
@@ -336,62 +316,12 @@ lastPrintECM=1000000 ; // large number
 outputFrameECM=0 ; 
 numNodesECM= numberNodes_ECM ; //(eCMMaxX-eCMMinX)/eCMMinDist ; 
 
-
-
-// indexECM.resize(numNodesECM,0) ;
-// peripORexcm.resize(numNodesECM,perip) ;
-// dampCoef.resize(numNodesECM) ; 
-// nodeECMLocX.resize(numNodesECM,0.0) ;
-// nodeECMLocY.resize(numNodesECM,0.0) ;
-
-
-// cellNeighborId.resize(numNodesECM,-1) ;
-
-// stiffLevel.resize(numNodesECM) ;
-// sponLen.resize(numNodesECM) ;
-
-// linSpringForceECMX.resize(numNodesECM,0.0); 
-// linSpringForceECMY.resize(numNodesECM,0.0); 
-// linSpringAvgTension.resize(numNodesECM,0.0); 
-// linSpringEnergy.resize(numNodesECM,0.0); 
-// morseEnergy.resize(numNodesECM,0.0); 
-// adhEnergy.resize(numNodesECM,0.0); 
-
-
-// bendSpringForceECMX.resize(numNodesECM,0.0); 
-// bendSpringForceECMY.resize(numNodesECM,0.0);  
-// memMorseForceECMX.resize(numNodesECM,0.0); 
-// memMorseForceECMY.resize(numNodesECM,0.0);
- 
-// fBendCenterX.resize(numNodesECM,0.0); 
-// fBendCenterY.resize(numNodesECM,0.0); 
-// fBendLeftX.resize(numNodesECM,0.0); 
-// fBendLeftY.resize(numNodesECM,0.0); 
-// fBendRightX.resize(numNodesECM,0.0); 
-// fBendRightY.resize(numNodesECM,0.0); 
- 
-// totalForceECMX.resize(numNodesECM,0.0); 
-// totalForceECMY.resize(numNodesECM,0.0);
-
-// totalExplicitForceECMX.resize(numNodesECM,0.0); 
-// totalExplicitForceECMY.resize(numNodesECM,0.0);
-
-
-// rHSX.resize(numNodesECM,0.0); 
-// rHSY.resize(numNodesECM,0.0);
-// //memNodeType.resize(maxTotalNodes,notAssigned1) ; 
-
-
-// nodeIsActive.resize(numNodesECM,true) ; 
-// thrust::sequence (indexECM.begin(),indexECM.begin()+numNodesECM);
-
 indexECM.resize(maxTotalNodes,0) ;
 peripORexcm.resize(maxTotalNodes,perip) ;
 dampCoef.resize(maxTotalNodes) ; 
 nodeECMLocX.resize(maxTotalNodes,0.0) ;
 nodeECMLocY.resize(maxTotalNodes,0.0) ;
 // isActiveECM.resize(maxTotalNodes,false);
-
 
 cellNeighborId.resize(maxTotalNodes,-1) ;
 
@@ -437,9 +367,6 @@ thrust::copy(posXIni_ECM.begin(),posXIni_ECM.end(),nodeECMLocX.begin()) ;
 thrust::copy(posYIni_ECM.begin(),posYIni_ECM.end(),nodeECMLocY.begin()) ; 
 thrust::copy(eNodeVec.begin(),eNodeVec.end(),peripORexcm.begin()) ;
 
-// for (int i = 0; i < posXIni_ECM.size(); i++){
-// 	isActiveECM[i] == true;
-// }
 
 AssignDampCoef() ; 
 cout << "GPU level initial coordinates and type of external nodes are: " << endl ; 
@@ -511,17 +438,6 @@ if (curTime<(100*dt) || isECMNeighborSet==false) {
 	isECMNeighborSet=true ; 
 	counter=0 ;
 	FindNeighborCandidateForCellsAndECMNodes(); 
-	// int ECMAdd_indx = decideIfAddECMNode_M(numNodesECM);
-	// if (ECMAdd_indx >= 0){
-	// 	AddECMNode(ECMAdd_indx, numNodesECM);
-	// 	numNodesECM += 1;
-	// 	std::cout<<"New ecm node added!"<<std::endl;
-	// 	std::cout<<"Current numECMNodes : "<<numNodesECM<<std::endl;
-	// }
-	// FindNeighborCandidateForCellsAndECMNodes();
-	// for (int i = 0; i < numNodesECM; i++){
-	// 	std::cout<<cellNeighborId[i]<<std::endl;
-	// }
 }
 // std::cout<<"ERROR 2"<<std::endl;
 if (cellsPointerECM->getCellInfoVecs().isPostDivision ==true || cellsPointerECM->getCellInfoVecs().isPostAddMembrNodes == true){
@@ -537,13 +453,6 @@ if (cellsPointerECM->getCellInfoVecs().isPostDivision ==true || cellsPointerECM-
 	// }
 	FindNeighborCandidateForCellsAndECMNodes();
 	isECMNeighborResetPostDivision=true;
-	// for (int i = 0; i < numNodesECM; i++){
-	// 	std::cout<<cellNeighborId[i]<<std::endl;
-	// }
-	// std::cout<<"SponLen : "<<std::endl;
-	// for (int i = 0; i < numNodesECM; i++){
-	// 	std::cout<<sponLen[i]<<std::endl;
-	// }
 }
 // std::cout<<"ERROR 3"<<std::endl;
 #ifdef debugModeECM
@@ -553,12 +462,6 @@ if (cellsPointerECM->getCellInfoVecs().isPostDivision ==true || cellsPointerECM-
 #endif
 
 MoveCellNodesByECMForces(totalNodeCountForActiveCellsECM,currentActiveCellCount,dt, Damp_CoefCell, mitoticThreshold) ; 
-
-// std::cout<<"ERROR 4"<<std::endl;
-/* To reduce computational cost
-energyECM.totalMorseEnergyCellECM = thrust::reduce( morseEnergyCell.begin(),morseEnergyCell.begin()+totalNodeCountForActiveCellsECM,(double) 0.0, thrust::plus<double>() ); 
-energyECM.totalAdhEnergyCellECM   = thrust::reduce( adhEnergyCell.begin()  ,adhEnergyCell.begin()  +totalNodeCountForActiveCellsECM,(double) 0.0, thrust::plus<double>() );
-*/
 
 CalLinSpringForce(); 
 // std::cout<<"ERROR 5"<<std::endl;
@@ -571,12 +474,6 @@ CalBendSpringForce();
 #endif
 CalCellForcesOnECM(mitoticThreshold) ;
 // std::cout<<"ERROR 7"<<std::endl;
-//energyECM.totalLinSpringEnergyECM = 0.5 * ( thrust::reduce( linSpringEnergy.begin(),linSpringEnergy.begin()+numNodesECM,(double) 0.0, thrust::plus<double>() )); 
-//to make sure it is based on the distance used for action force calculation.
-/* To reduce computational cost 
-energyECM.totalMorseEnergyECMCell = thrust::reduce( morseEnergy.begin(),morseEnergy.begin()+numNodesECM,(double) 0.0, thrust::plus<double>() ); 
-energyECM.totalAdhEnergyECMCell   = thrust::reduce( adhEnergy.begin()  ,adhEnergy.begin()  +numNodesECM,(double) 0.0, thrust::plus<double>() );
-*/
 
 if (!implicit_solver_active) {
 // Calculate summation of all forces and move nodes if explicit solver is going to be used
@@ -584,11 +481,6 @@ if (!implicit_solver_active) {
     MoveNodesBySumAllForces(dt) ; 
 }
 // std::cout<<"ERROR 8"<<std::endl;
-// if (implicit_solver_active) {
-// //Calculate right hand side of implicit solver which includes explicit forces
-//     CalSumOnlyExplicitForcesOnECM() ;
-//     CalRHS(dt) ;
-// }
 
 #ifdef debugModeECM
 	cudaEventRecord(start5, 0);
@@ -596,33 +488,11 @@ if (!implicit_solver_active) {
 	cudaEventElapsedTime(&elapsedTime4, start4, start5);
 #endif
 
-//Create tmp CPU vectors for using in implicit solver. Declariation is not acceptable to be inisde the if condition
-    // vector <double> tmpRHSX(numNodesECM); 
-    // vector <double> tmpRHSY(numNodesECM); 
-    // tmpHostNodeECMLocX.resize(numNodesECM); 
-    // tmpHostNodeECMLocY.resize(numNodesECM); 
-// if (implicit_solver_active) {
-// // Copy ECM locations from GPU to CPU if implicit solver is used    
-	
-//     thrust::copy (rHSX.begin(), rHSX.begin()+numNodesECM, tmpRHSX.begin()); 
-//     thrust::copy (rHSY.begin(), rHSY.begin()+numNodesECM, tmpRHSY.begin()); 
-//     thrust::copy (nodeECMLocX.begin(), nodeECMLocX.begin()+numNodesECM, tmpHostNodeECMLocX.begin()); 
-//     thrust::copy (nodeECMLocY.begin(), nodeECMLocY.begin()+numNodesECM, tmpHostNodeECMLocY.begin());
-//     //cout << "max RHSX is " << *max_element(tmpRHSX.begin(), tmpRHSX.begin()+numNodesECM) << endl ;  
-//     //cout << "min RHSX is " << *min_element(tmpRHSX.begin(), tmpRHSX.begin()+numNodesECM) << endl ;
-//     //cout << "max RHSY is " << *max_element(tmpRHSY.begin(), tmpRHSY.begin()+numNodesECM) << endl ;  
-//     //cout << "min RHSY is " << *min_element(tmpRHSY.begin(), tmpRHSY.begin()+numNodesECM) << endl ; 
-// }
     #ifdef debugModeECM
 	cudaEventRecord(start6, 0);
 	cudaEventSynchronize(start6);
 	cudaEventElapsedTime(&elapsedTime5, start5, start6);
     #endif
-
-// if (implicit_solver_active) {
-//     // setting up eqaution of motion if implicit solver is used
-//     EquMotionCoef (dt); 
-// }
 
     #ifdef debugModeECM
 	cudaEventRecord(start7, 0);
@@ -630,37 +500,11 @@ if (!implicit_solver_active) {
 	cudaEventElapsedTime(&elapsedTime6, start6, start7);
     #endif
 
-// if (implicit_solver_active) {
-//     // Fetch the implicit solver and update ECM location if implicit solver is used
-//     tmpHostNodeECMLocX =solverPointer->SOR3DiagPeriodic(nodeIsActive,hCoefLd, hCoefD, hCoefUd,tmpRHSX,indexPrev, indexNext, tmpHostNodeECMLocX); 
-//     tmpHostNodeECMLocY =solverPointer->SOR3DiagPeriodic(nodeIsActive,hCoefLd, hCoefD, hCoefUd,tmpRHSY,indexPrev,indexNext, tmpHostNodeECMLocY);
-
-//     // copy ECM node locations back from CPU to GPU if implicit solver is used    
-//     thrust::copy (tmpHostNodeECMLocX.begin(), tmpHostNodeECMLocX.begin()+numNodesECM, nodeECMLocX.begin()); 
-//     thrust::copy (tmpHostNodeECMLocY.begin(), tmpHostNodeECMLocY.begin()+numNodesECM, nodeECMLocY.begin());
-
-// }
     #ifdef debugModeECM
 	cudaEventRecord(start8, 0);
 	cudaEventSynchronize(start8);
 	cudaEventElapsedTime(&elapsedTime7, start7, start8);
     #endif
-/* To reduce computational cost
-cout << "total Morse energy for cell-ECM is= "<< energyECM.totalMorseEnergyCellECM << endl ; 
-cout << "total Morse energy for ECM-cell  is= "<< energyECM.totalMorseEnergyECMCell << endl ;
-cout << "total adhesion energy for cell-ECM is= "<<  energyECM.totalAdhEnergyCellECM << endl ; 
-cout << "total adhesion energy for ECM-cell  is= "<< energyECM.totalAdhEnergyECMCell << endl ; 
-//assert (abs (energyECM.totalMorseEnergyCellECM-energyECM.totalMorseEnergyECMCell)<1.0) ;
-//assert (abs (energyECM.totalAdhEnergyCellECM-  energyECM.totalAdhEnergyECMCell)  <1.0) ;
-
-
-if (  (abs (energyECM.totalMorseEnergyCellECM-energyECM.totalMorseEnergyECMCell)>1.0) || 
-	  (abs (energyECM.totalAdhEnergyCellECM-  energyECM.totalAdhEnergyECMCell)  >1.0)
-   ) {
-
-	cout << "Warning: Action and reaction forces in the ECM do not match each other" << endl ; 
-}
-*/ 
 
 # ifdef debugModeECM 
 	cudaEventRecord(stop, 0);
@@ -741,14 +585,6 @@ void  SceECM:: PrintECM(double curTime) {
 					ECMLocationExport<< nodeECMLocX[i] << " " << nodeECMLocY[i] << " " << 0.0 << " "<< peripORexcm[i]<<std::endl;
 		//		}
 			}
-
-			//ECMExport << "ECM lumen side coordinates" << std::endl;
-		//	for (uint i = 0; i < nodeECMLocX.size(); i++) {
-		//		if (peripORexcm[i]==perip) {
-		//			ECMLocationExport << nodeECMLocX[i] << " " << nodeECMLocY[i] << " "
-		//			<< 0.0 << std::endl;
-		//		}
-		//	}
 
 			ECMLocationExport.close();
 		
@@ -835,8 +671,6 @@ void  SceECM:: PrintECMRemoved(double curTime) {
 		}
 
 }
-
-
 
 
 AniResumeData  SceECM:: obtainResumeData() {
@@ -1329,21 +1163,6 @@ void SceECM::AssignDampCoef() {
 }
 
 int SceECM::decideIfAddECMNode_M(uint numECMNodes) {
-// decide if add ecm node given current active node count
-	// uint maxECMNode = numNodesECM*3;
-	// bool isInitPhase= nodes->isInitPhase ; 
-        //  thrust::transform(
-		// 	thrust::make_zip_iterator(
-		// 			thrust::make_tuple(maxDistToRiVec.begin(),
-		// 							   maxTenIndxTypeVec.begin()
-		// 							   )),
-		// 	thrust::make_zip_iterator(
-		// 			thrust::make_tuple(maxDistToRiVec.begin(),
-		// 							   maxTenIndxTypeVec.begin()
-		// 							   ))
-		// 			+ curActCellCt,
-		// 			isECMAddingNode,
-		// 	ECMGrowFunc(numECMNodes, maxTotalNodes, maxLengthToAddECMNodes));
 	double max_Dist = -9999.9;
 	int indx = -1;
 	for (int i = 0; i < numECMNodes; i++){
@@ -1375,13 +1194,7 @@ void SceECM::AddECMNode(int indx, uint numECMNodes){
 		insertY = (nodeECMLocY[indx] + nodeECMLocY[indx+1])/2.0;
 		uint globalIndxEnd = numECMNodes; //membrane nodes are first. End position based on newindex
 		uint globalIndexInsert = insertIndx;
-		// if (insertIndx<=iDApical) {  //since the current acrive membrane nodes is one more, it can not be the last ID.
-		// 	iDApical=iDApical+1 ;
-		// }
 
-		// if (insertIndx<=iDBasal) {
-		// 	iDBasal=iDBasal+1 ;
-		// }
 		for (uint i = globalIndxEnd; i >= globalIndexInsert; i--) {
 			// isActiveECM[i] = isActiveECM[i - 1];
 			nodeECMLocX[i] = nodeECMLocX[i - 1];
@@ -1401,38 +1214,5 @@ void SceECM::AddECMNode(int indx, uint numECMNodes){
 		std::cout<<"sponLen[globalIndexInsert] : "<<sponLen[globalIndexInsert]<<std::endl;
 		dampCoef[globalIndexInsert] = dampCoef[globalIndexInsert-1];
 		std::cout<<"dampCoef[globalIndexInsert] : "<<dampCoef[globalIndexInsert]<<std::endl;
-
-		// if (_memNodeType[globalIndexInsert-1] != apical1 || _memNodeType[globalIndexInsert-1] != basal1){
-		// 	_memNodeType[globalIndexInsert] = _memNodeType[globalIndexInsert+1];
-		// }
-		//return (curActCount + 1);
-		// numECMNodes += 1;
 	
 };
-
-// void SceECM::calECMGrowSpeed_M() {
-// // reduce_by_key, find value of max tension and their index
-// 	thrust::counting_iterator<uint> iBegin(0);
-	
-// 	uint maxNPerCell = allocPara_m.maxAllNodePerCell;
-	
-// 	thrust::transform(
-// 			thrust::make_zip_iterator(
-// 					thrust::make_tuple(
-// 							ECMDistToRi.begin(),
-// 							ECMNodeType1.begin())),
-// 			thrust::make_zip_iterator(
-// 					thrust::make_tuple(
-// 							ECMbrDistToRi.begin(),
-// 							ECMNodeType1.begin()))
-// 							+ numECMNodes,
-// 			thrust::make_zip_iterator(
-// 					thrust::make_tuple(maxDistToRiVec.begin(),
-// 							maxTenIndxTypeVec.begin())),
-// 			thrust::equal_to<uint>(), MaxWInfo());
-
-	// for (int i=0 ; i<cellInfoVecs.maxDistToRiVec.size() ; i++) {
-	// 	cout << "the max distance in cell" << i << " is "<<cellInfoVecs.maxDistToRiVec[i] << endl ;
-	// 	cout << "At index "<<cellInfoVecs.maxTenIndxVec[i]<<std::endl; 
-	// }
-// }

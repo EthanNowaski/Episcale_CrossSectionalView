@@ -40,16 +40,6 @@ __constant__ double bondStiff_M;
 __constant__ double bondStiff_Mitotic;
 __constant__ double bondAdhCriLen_M;
 
-// #define DebugMode
-
-// This template method expands an input sequence by
-// replicating each element a variable number of times. For example,
-//
-//   expand([2,2,2],[A,B,C]) -> [A,A,B,B,C,C]
-//   expand([3,0,1],[A,B,C]) -> [A,A,A,C]
-//   expand([1,3,2],[A,B,C]) -> [A,B,B,B,C,C]
-//
-// The element counts are assumed to be non-negative integers
 template<typename InputIterator1, typename InputIterator2,
 		typename OutputIterator>
 OutputIterator expand(InputIterator1 first1, InputIterator1 last1,
@@ -135,8 +125,6 @@ int SceNodes::NumAdhAfter(int cellRank,ECellType eCellType) {
 					}
 	}
 }
-
-
 
 
 void SceNodes::readDomainPara() {
@@ -317,7 +305,6 @@ SceNodes::SceNodes(uint totalBdryNodeCount, uint maxProfileNodeCount,
 
 SceNodes::SceNodes(uint maxTotalCellCount, uint maxAllNodePerCell, uint currentActiveCellCount) {
 	//initControlPara (isStab);
-
 
 	cout<< " I am inside SceNodes constructor which I beleive is active" << endl ;
 
@@ -549,8 +536,6 @@ void SceNodes::readParas_M() {
 	mechPara_M.sceInterBParaCPU_Jones_M[1] = sig_InterB_Jones;
 	mechPara_M.sceInterBParaCPU_Jones_M[2] = interBEffectiveRange_Jones;
 //Ali
-
-
 
 	//////////////////////
 	//// Block 2 /////////
@@ -1979,9 +1964,6 @@ void handleAdhesionForce_M2(double& xPos, double& yPos,
 
 	}
 
-
-
-
 //Ali June 16
 __device__
 double getMitoticAdhCoef(double& growProg, double& growProgNeigh){
@@ -2062,33 +2044,6 @@ void handleSceForceNodesDisc(uint& nodeRank1, uint& nodeRank2, double& xPos,
 	}
 }
 
-// __device__
-// void handleSceForceNodesDisc_M(uint& nodeRank1, uint& nodeRank2, double& xPos,
-// 		double& yPos, double& xPos2, double& yPos2, double& xRes, double& yRes,
-// 		double* _nodeLocXAddress, double* _nodeLocYAddress,
-// 		double* _nodeGrowProAddr) {
-
-// 	if (isSameCell_m(nodeRank1, nodeRank2)) {
-// 		if (bothInternal(nodeRank1, nodeRank2)) {
-// 			// both nodes are internal type.
-// 			calAndAddIntraDiv_M(xPos, yPos, _nodeLocXAddress[nodeRank2],
-// 					_nodeLocYAddress[nodeRank2], _nodeGrowProAddr[nodeRank2],
-// 					xRes, yRes);
-// 		} else if (bothMembr(nodeRank1, nodeRank2)) {
-// 			// both nodes epithilium type. no sce force applied.
-// 			// nothing to do here.
-// 		} else {
-// 			// one node is epithilium type the other is internal type.
-// 			calAndAddIntraB_M(xPos, yPos, _nodeLocXAddress[nodeRank2],
-// 					_nodeLocYAddress[nodeRank2], xRes, yRes);
-// 		}
-// 	} else {
-// 		if (bothMembr(nodeRank1, nodeRank2)) {
-// 			calAndAddInter_M(xPos, yPos, _nodeLocXAddress[nodeRank2],
-// 					_nodeLocYAddress[nodeRank2], xRes, yRes);
-// 		}
-// 	}
-// }
 
 void SceNodes::extendBuckets2D() {
 	static const uint extensionFactor2D = 9;
@@ -2934,138 +2889,6 @@ void SceNodes::sceForcesDisc_M(double timeRatio, double timeRatio_Crit_Division,
 #endif
 	if (timeRatio == 0 && cycle <= 0){
 		// std::cout<<"Setting the anisotropic contractility profile"<<std::endl;
-		// std::cout<<"This message should only appear once, if more than once is shown, something is wrong!"<<std::endl;
-		// std::vector<double> contractActomyo_multip;
-		// //Starting from cell 0 to cell 62
-		// contractActomyo_multip.push_back(0.0);//CellID0
-		// contractActomyo_multip.push_back(0.0);
-		// contractActomyo_multip.push_back(0.536452492);
-		// contractActomyo_multip.push_back(0.52731934 );
-		// contractActomyo_multip.push_back(0.586284249);
-		// contractActomyo_multip.push_back(0.634834161);
-		// contractActomyo_multip.push_back(0.639320622);
-		// contractActomyo_multip.push_back(0.690594456);
-		// contractActomyo_multip.push_back(0.704374299);
-		// contractActomyo_multip.push_back(0.817977888);
-		// contractActomyo_multip.push_back(0.825348502);
-		// contractActomyo_multip.push_back(0.831277039);
-		// contractActomyo_multip.push_back(0.791539817);
-		// contractActomyo_multip.push_back(0.845217113);
-		// contractActomyo_multip.push_back(0.963467393);
-		// contractActomyo_multip.push_back(0.949206858);
-		// contractActomyo_multip.push_back(0.777279282);
-		// contractActomyo_multip.push_back(0.796026278);
-		// contractActomyo_multip.push_back(0.782887358);
-		// contractActomyo_multip.push_back(0.810767505);
-		// contractActomyo_multip.push_back(0.783528281);
-		// contractActomyo_multip.push_back(0.654382311);
-		// contractActomyo_multip.push_back(0.631950008);
-		// contractActomyo_multip.push_back(0.734657907);
-		// contractActomyo_multip.push_back(0.653260695);
-		// contractActomyo_multip.push_back(0.667040538);
-		// contractActomyo_multip.push_back(0.653581157);
-		// contractActomyo_multip.push_back(0.686909149);
-		// contractActomyo_multip.push_back(0.59509694 );
-		// contractActomyo_multip.push_back(0.636596699);
-		// contractActomyo_multip.push_back(0.56449287 );
-		// contractActomyo_multip.push_back(0.655343695);
-		// contractActomyo_multip.push_back(0.650536773);
-		// contractActomyo_multip.push_back(0.794584201);
-		// contractActomyo_multip.push_back(0.664156385);
-		// contractActomyo_multip.push_back(0.692997917);
-		// contractActomyo_multip.push_back(0.675212306);
-		// contractActomyo_multip.push_back(0.623297548);
-		// contractActomyo_multip.push_back(0.662714309);
-		// contractActomyo_multip.push_back(0.536612722);
-		// contractActomyo_multip.push_back(0.561288255);
-		// contractActomyo_multip.push_back(0.701650377);
-		// contractActomyo_multip.push_back(0.613683705);
-		// contractActomyo_multip.push_back(0.647332158);
-		// contractActomyo_multip.push_back(0.602467553);
-		// contractActomyo_multip.push_back(0.696042301);
-		// contractActomyo_multip.push_back(0.661592693);
-		// contractActomyo_multip.push_back(0.697003685);
-		// contractActomyo_multip.push_back(0.732574908);
-		// contractActomyo_multip.push_back(0.669123538);
-		// contractActomyo_multip.push_back(0.635475084);
-		// contractActomyo_multip.push_back(0.62586124 );
-		// contractActomyo_multip.push_back(0.632590931);
-		// contractActomyo_multip.push_back(0.701490146);
-		// contractActomyo_multip.push_back(0.712065374);
-		// contractActomyo_multip.push_back(0.795385355);
-		// contractActomyo_multip.push_back(0.798910431);
-		// contractActomyo_multip.push_back(0.838647653);
-		// contractActomyo_multip.push_back(0.777279282);
-		// contractActomyo_multip.push_back(0.693158148);
-		// contractActomyo_multip.push_back(0.647492389);
-		// contractActomyo_multip.push_back(0.631950008);
-		// contractActomyo_multip.push_back(0.611760936);
-
-
-		// std::vector<double> contractActomyo_multip_apical;
-		// contractActomyo_multip_apical.push_back(0.0);//CellID0
-		// contractActomyo_multip_apical.push_back(0.0);
-		// contractActomyo_multip_apical.push_back(0.563851947);
-		// contractActomyo_multip_apical.push_back(0.617529242);
-		// contractActomyo_multip_apical.push_back(0.626502163);
-		// contractActomyo_multip_apical.push_back(0.623938471);
-		// contractActomyo_multip_apical.push_back(0.623137318);
-		// contractActomyo_multip_apical.push_back(0.669764461);
-		// contractActomyo_multip_apical.push_back(0.63675693 );
-		// contractActomyo_multip_apical.push_back(0.672808845);
-		// contractActomyo_multip_apical.push_back(0.686268226);
-		// contractActomyo_multip_apical.push_back(0.679858997);
-		// contractActomyo_multip_apical.push_back(0.708059606);
-		// contractActomyo_multip_apical.push_back(0.7002083  );
-		// contractActomyo_multip_apical.push_back(0.791059125);
-		// contractActomyo_multip_apical.push_back(0.752123057);
-		// contractActomyo_multip_apical.push_back(0.770549591);
-		// contractActomyo_multip_apical.push_back(0.756609518);
-		// contractActomyo_multip_apical.push_back(0.786412434);
-		// contractActomyo_multip_apical.push_back(0.76814613 );
-		// contractActomyo_multip_apical.push_back(0.683544304);
-		// contractActomyo_multip_apical.push_back(0.701329915);
-		// contractActomyo_multip_apical.push_back(0.721038295);
-		// contractActomyo_multip_apical.push_back(0.798910431);
-		// contractActomyo_multip_apical.push_back(0.745874059);
-		// contractActomyo_multip_apical.push_back(0.767505207);
-		// contractActomyo_multip_apical.push_back(0.787534049);
-		// contractActomyo_multip_apical.push_back(0.823746195);
-		// contractActomyo_multip_apical.push_back(0.835603269);
-		// contractActomyo_multip_apical.push_back(0.873257491);
-		// contractActomyo_multip_apical.push_back(0.822945041);
-		// contractActomyo_multip_apical.push_back(1          );
-		// contractActomyo_multip_apical.push_back(0.834161192);
-		// contractActomyo_multip_apical.push_back(0.783528281);
-		// contractActomyo_multip_apical.push_back(0.830315655);
-		// contractActomyo_multip_apical.push_back(0.778240667);
-		// contractActomyo_multip_apical.push_back(0.795064893);
-		// contractActomyo_multip_apical.push_back(0.775516744);
-		// contractActomyo_multip_apical.push_back(0.756289056);
-		// contractActomyo_multip_apical.push_back(0.714148374);
-		// contractActomyo_multip_apical.push_back(0.692517225);
-		// contractActomyo_multip_apical.push_back(0.750841211);
-		// contractActomyo_multip_apical.push_back(0.785130588);
-		// contractActomyo_multip_apical.push_back(0.714949527);
-		// contractActomyo_multip_apical.push_back(0.675372536);
-		// contractActomyo_multip_apical.push_back(0.71126422 );
-		// contractActomyo_multip_apical.push_back(0.656785772);
-		// contractActomyo_multip_apical.push_back(0.658227848);
-		// contractActomyo_multip_apical.push_back(0.655023233);
-		// contractActomyo_multip_apical.push_back(0.616567858);
-		// contractActomyo_multip_apical.push_back(0.62810447 );
-		// contractActomyo_multip_apical.push_back(0.629065855);
-		// contractActomyo_multip_apical.push_back(0.638679699);
-		// contractActomyo_multip_apical.push_back(0.660471078);
-		// contractActomyo_multip_apical.push_back(0.667521231);
-		// contractActomyo_multip_apical.push_back(0.568017946);
-		// contractActomyo_multip_apical.push_back(0.633231854);
-		// contractActomyo_multip_apical.push_back(0.564332639);
-		// contractActomyo_multip_apical.push_back(0.548309566);
-		// contractActomyo_multip_apical.push_back(0.584842173);
-		// contractActomyo_multip_apical.push_back(0.550552796);
-		// contractActomyo_multip_apical.push_back(0.539817337);
-		// contractActomyo_multip_apical.push_back(0.529722801);
 
 		for (int i = 0; i < allocPara_M.maxTotalNodeCount; i++){
 			uint cellRank = i/allocPara_M.maxAllNodePerCell;
@@ -3462,17 +3285,6 @@ void SceNodes::processMembrAdh_M(double timeRatio, double timeRatio_Crit_Divisio
 void SceNodes::keepAdhIndxCopyInHost_M(double timeRatio, double timeRatio_Crit_Division, int cycle) {
 	uint maxTotalNode = allocPara_M.currentActiveCellCount
 			* allocPara_M.maxAllNodePerCell;
-			// std::cout<<"maxTotalNode = "<<maxTotalNode<<std::endl;
-			// std::cout<<infoVecs.nodeAdhereIndex.size()<<std::endl;
-			// std::cout<<infoVecs.nodeAdhIndxHostCopy.size()<<std::endl;
-			// if (cycle == 1 && timeRatio == timeRatio_Crit_Division){
-			// 	for (int i = 0 ; i < infoVecs.nodeAdhIndxHostCopy.size(); i++){
-			// 		std::cout<<"nodeAdhIndxHostCopy at 2nd division = "<<infoVecs.nodeAdhIndxHostCopy[i]<<std::endl;
-			// 	}
-			// }
-	// thrust::copy(infoVecs.nodeAdhereIndex.begin(),
-	// 		infoVecs.nodeAdhereIndex.begin() + maxTotalNode,
-	// 		infoVecs.nodeAdhIndxHostCopy.begin());
 }
 
 void SceNodes::removeInvalidPairs_M() {
@@ -3526,23 +3338,6 @@ void SceNodes::applyMembrAdh_M() {
 		//for (int i=0 ; i<140 ; i++){
 		//	cout <<"adhesion index for "<<i << " is "<<infoVecs.nodeAdhereIndex[i]<< endl ; 
 //		}
-
-/*	thrust::transform(
-			thrust::make_zip_iterator(
-					thrust::make_tuple(infoVecs.nodeIsActive.begin(),
-							iBegin2,
-							infoVecs.nodeVelX.begin(),
-							infoVecs.nodeVelY.begin())),
-			thrust::make_zip_iterator(
-					thrust::make_tuple(infoVecs.nodeIsActive.begin(),
-							iBegin2,
-							infoVecs.nodeVelX.begin(),
-							infoVecs.nodeVelY.begin())) + maxTotalNode,
-			thrust::make_zip_iterator(
-					thrust::make_tuple(infoVecs.nodeVelX.begin(),
-									   infoVecs.nodeVelY.begin())),
-			ApplyAdhReaction(nodeLocXAddress, nodeLocYAddress, nodeGrowProAddr,nodeAdhAddr,maxTotalNode));
-*/
 }
 
 //AAMIRI-Ali 

@@ -138,12 +138,7 @@ public:
 	 * Contains cell level logics and node level logics.
 	 * @param dt timestep
 	 */
-//Ali 	void runAllLogic_M(double dt);
-	// void runAllLogic_M(double & dt,double Damp_Coef,double InitTimeStage, 
-	// 						double timeRatio, double timeRatio_Crit_actomyo, double timeRatio_Crit_ECM, double timeRatio_Crit_Growth,
-	// 							double volume_Increase_Target_Ratio, double volume_Increase_Scale, double postDivision_restorationRateScale, int cycle,
-	// 							double distFromNucleus_max, double distFromNucleus_min, double distFromNucleus_normalMax, double distFromNucleus_normalMax_apical, double percentage_before_timeRatio_Crit_Division_scaling,
-	// 							double growthProgressSpeed, int maxApicalBasalNodeNum, int minApicalBasalNodeNum, double maxLengthToAddMemNodes);
+	
 	void runAllLogic_M(double & dt,double Damp_Coef,double InitTimeStage, 
 							double timeRatio, double timeRatio_Crit_actomyo, double timeRatio_Crit_ECM, double timeRatio_Crit_Growth,
 								double volume_Increase_Target_Ratio, double volume_Increase_Scale, double postDivision_restorationRateScale, int cycle,

@@ -49,24 +49,12 @@ typedef thrust::tuple<uint, uint, uint, double, double, double, double, double, 
 typedef thrust::tuple<uint, uint, uint, uint, double, double, double> CellData;
 typedef thrust::tuple<double, uint, double, double, uint, uint, bool, double, double,MembraneType1> DUiDDUiUiBDDT ;
 
-//typedef pair<device_vector<double>::iterator,device_vector<double>::iterator> MinMaxNode ; 
-// maxMemThres, cellRank, nodeRank , locX, locY, velX, velY
-
-/*
- __device__
- SceNodeType indxToType(uint& indx);
-
- SceNodeType indxToType(uint& indx);
- */
 
 __device__
 double CalExtForce(double  curTime);
 
  __device__
 double DefaultMembraneStiff();
-//Ali comment 
-//__device__
-//double calMembrForce(double& length);
 
 //Ali & Abu June 30th 2016  
 __device__
@@ -235,19 +223,6 @@ struct isActiveNoneBdry {
 	}
 };
 
-// struct MaxWInfo: public thrust::binary_function<DUiDDD, DUiDDD, DUiDDD> {
-// 	__host__ __device__ DUiDDD operator()(const DUiDDD& data1,
-// 			const DUiDDD& data2) {
-// 		double num1 = thrust::get<4>(data1); // choose the max distance not the maximum tension
-// 		double num2 = thrust::get<4>(data2);
-// 		if (num1 > num2) {
-// 			return data1;
-// 		} else {
-// 			return data2;
-// 		}
-// 	}
-// };
-
 struct MaxWInfo: public thrust::binary_function<DUiDDDT, DUiDDDT, DUiDDDT> {
 	__host__ __device__ DUiDDDT operator()(const DUiDDDT& data1,
 			const DUiDDDT& data2) {
@@ -406,24 +381,6 @@ struct ActinLevelCal: public thrust::unary_function<ActinData, double> {
 
 			actinLevel=1*kStiff ;  // default
 
-		/*
-			if (_membPolar) {  // if # 4 start 
-				if (cellType==pouch) {  // if # 5 starts 
-                
-					actinLevel=0.5*kStiff ;
-				}
-				else if (cellType==bc) { // if #5 continue 
-					
-					actinLevel=1*kStiff ;
-
-				}
-				else { // means peri  // if # 5 continue 
-
-					actinLevel=2*kStiff ;
-				}  // if # 5 ends
-			}  // if # 4 ends
-		*/			
-
 	//		if (_subMembPolar) { // if # 6 s
 				if ( (cellType==pouch && memType==lateralB) || (cellType==pouch && memType==lateralA)  ) { 
 					actinLevel=3.0*kStiff ;  //0.5
@@ -456,25 +413,6 @@ struct ActinLevelCal: public thrust::unary_function<ActinData, double> {
 				if (cellType==bc &&  memType==basal1) {
 					 actinLevel=3.0*kStiff ;
 				}
-
-
-
-			    //if   (cellType==bc) {  // bc cell type either apicalbasal or lateral
-				//	actinLevel=1*kStiff ;
-			//	}
-	//		} // if #6 end
-
-		//	if (memType==lateralB) {
-		//		actinLevel=7.5*kStiff ;
-		//	}
-
-		//	if (memType==lateralA) {
-		//		actinLevel=2.0*kStiff ;
-		//	}
-		//	if (isSubApical) {
-
-					//actinLevel=6.0*kStiff ;
-		//	}
 
 		    return actinLevel;
 
@@ -756,7 +694,6 @@ struct ApicalLocCal: public thrust::unary_function<CVec2Int,CVec2> {
 	//		return thrust::make_tuple(0,0) ; // there is no apical node 
 	//	}
 
-
 	}
 }; 
 
@@ -798,19 +735,6 @@ struct AssignMemNodeType: public thrust::unary_function<BTUiUi, TII> {
 		MembraneType1   nodeType= thrust::get<1>(bTUiUi); 
 		uint            nodeRank = thrust::get<2>(bTUiUi) ; // node rank in each cell 
 		uint            activeMembrCount = thrust::get<3>(bTUiUi) ; 
-/*
-		if (isActive == false || nodeRank >= activeMembrCount) { 
-			return thrust::make_tuple(notAssigned1,0);
-		} else if(nodeType==lateral1) { 
-			return thrust::make_tuple( lateral1,0) ; 
-		}
-			else if (nodeType==basal1) {
-				return thrust::make_tuple(basal1,0) ; 
-			}
-				else {
-					return thrust::make_tuple(apical1,1) ; 
-		}
-*/
 
 		if(nodeType==apical1) { 
 			return thrust::make_tuple( nodeType,1,0) ;
@@ -824,25 +748,10 @@ struct AssignMemNodeType: public thrust::unary_function<BTUiUi, TII> {
 			return thrust::make_tuple( nodeType,0,0) ;
 
 		}
-		/*
-		if (isActive == false || nodeRank >= activeMembrCount) { 
-			return thrust::make_tuple(notAssigned1,0);
-		} else if(nodeType==apical1) { 
-			return thrust::make_tuple( apical1,1) ; 
-			}
-			else if (nodeType==basal1) {
-				return thrust::make_tuple(basal1,0) ; 
-				}
-				else {
-					return thrust::make_tuple(lateral1,0) ; 
-		}
-		*/
+		
 	}
 
 }; 
-
-
-
 
 
 
@@ -1118,9 +1027,6 @@ struct CalMembrEnergy: public thrust::unary_function<DUiUiUiDD, CVec2> {
 
 
 
-
-
-
 struct AddExtForces: public thrust::unary_function<TDD, CVec4> {
 
 	double _curTime ; 
@@ -1241,32 +1147,8 @@ struct AddLagrangeForces: public thrust::unary_function<DUiDDUiUiDDDD, CVec5> {
 			posYR = _locYAddr[index_right]-cellCenterY;
 			lenR = sqrt(posXR * posXR + posYR * posYR);
 				
-				
-	   		/*	
-			double term1X = lenL*lenL*posX ;
-			double term1Y = lenL*lenL*posY ;
-
-			double term2X=posX*posXL*posXL+posXL*posY*posYL ; 
-			double term2Y=posY*posYL*posYL+posYL*posX*posXL ; 
-
-			double term3X=lenR*lenR*posX ; 
-			double term3Y=lenR*lenR*posY ; 
-
-			double term4X=posX*posXR*posXR+ posXR*posY*posYR ;
-			double term4Y=posY*posYR*posYR+ posYR*posX*posXR ;
-
-			double term5=2*sqrt( pow(len*lenL,2)-pow(posX*posXL+posY*posYL, 2) ) ; 
-			double term6=2*sqrt( pow(len*lenR,2)-pow(posX*posXR+posY*posYR, 2) ) ; 
-			*/
 			double percent ; 
-			// int cellRank_division2;
-			// if (_cycle == 0){
-			// 	cellRank_division2 = 86;
-			// }
-			// else if (_cycle == 1){
-			// 	cellRank_division2 = 87;
-			// }
-
+			
 			if (progress>_mitoticCri) {
 				percent =(progress-_mitoticCri)/(1.0-_mitoticCri) ;  
 			}
@@ -1294,24 +1176,9 @@ struct AddLagrangeForces: public thrust::unary_function<DUiDDUiUiDDDD, CVec5> {
 				//65*1.5 would lead to nodes intersecting each other at relaxation step size of 2e-3
 				//65*1.25 would not lead to nodes intersecting each other at relaxation step size of 2e-3
 			}
-			// else if ((cellRank==_cellRank_division || cellRank==cellRank_division2) && _timeRatio > _timeRatio_Crit_Division){
-			// else if ((cellRank==_cellRank_division) && _timeRatio > _timeRatio_Crit_Division){
-			// 	double targetCellVolume = 65.0;
-			// 	// cellAreaDesire=(65*_volume_Increase_Target_Ratio)/2.0;
-			// 		// cellAreaDesire=(65*_volume_Increase_Target_Ratio/2.0) + (65 - (65*_volume_Increase_Target_Ratio/2.0))*_postDivision_restorationRateScale*_volume_Increase_Scale*(_timeRatio - _timeRatio_Crit_Division )/(1.0 - _timeRatio_Crit_Division);
-			// 	cellAreaDesire=(_cellAreaVecAddr[cellRank]) + (targetCellVolume - _cellAreaVecAddr[cellRank])*_postDivision_restorationRateScale*(_timeRatio - _timeRatio_Crit_Division )/(1.0 - _timeRatio_Crit_Division);
-			// }
-			// else if ((cellRank == _cellRank_division2) && _timeRatio > _timeRatio_Crit_Division){
-			// 	double targetCellVolume = 65.0;
-			// 	// cellAreaDesire=(65*_volume_Increase_Target_Ratio)/2.0;
-			// 		// cellAreaDesire=(65*_volume_Increase_Target_Ratio/2.0) + (65 - (65*_volume_Increase_Target_Ratio/2.0))*_postDivision_restorationRateScale*_volume_Increase_Scale*(_timeRatio - _timeRatio_Crit_Division )/(1.0 - _timeRatio_Crit_Division);
-			// 	cellAreaDesire=(_cellAreaVecAddr[cellRank]) + (targetCellVolume - _cellAreaVecAddr[cellRank])*_postDivision_restorationRateScale*(_timeRatio - _timeRatio_Crit_Division )/(1.0 - _timeRatio_Crit_Division);
-			// }
+			
 			else {
-				// double targetCellVolume = _cellAreaVecAddr[cellRank]*1000;
-				// if (targetCellVolume >= 65){
-				// 	targetCellVolume = 65;
-				// }
+				
 				if (_cellAreaVecAddr[cellRank] <= 65.0){
 					cellAreaDesire=(_cellAreaVecAddr[cellRank]) + _cellAreaGrowthProgressNonMitotic[cellRank];
 					if (cellAreaDesire >= 65){
@@ -1324,17 +1191,9 @@ struct AddLagrangeForces: public thrust::unary_function<DUiDDUiUiDDDD, CVec5> {
 						cellAreaDesire = 65.0;
 					}
 				}
-				// cellAreaDesire=65+ percent*65 ;
-				
 
 			}
 			
-/*
-			 fX=-2*kStiffArea*(_cellAreaVecAddr[cellRank]-cellAreaDesire)*
-			     ( (term1X-term2X)/term5+ (term3X-term4X)/term6 ) ; 
-			 fY=-2*kStiffArea*(_cellAreaVecAddr[cellRank]-cellAreaDesire)*
-			     ( (term1Y-term2Y)/term5+ (term3Y-term4Y)/term6 ) ; 
-*/
 			// cellAreaDesire=75 ; for single cell testing 
 			 fX=-2*kStiffArea*(_cellAreaVecAddr[cellRank]-cellAreaDesire)*
 			     (  posYR-posYL ) ; 
@@ -1401,11 +1260,6 @@ struct AddContractileRingForces: public thrust::unary_function<DIIUiUiDD, CVec2>
 		}
 	}
 }; 
-
-
-
-
-
 
 
 
@@ -1684,521 +1538,6 @@ struct AddSceCellForce: public thrust::unary_function<CellData, CVec6> {
 	}
 };
 
-// struct AddMemContractForce: public thrust::unary_function<DUiDDUiUiBDDT , CVec6> {
-// 	uint _maxNodePerCell;
-// 	uint _maxMemNodePerCell;
-// 	double* _locXAddr;
-// 	double* _locYAddr;
-// 	MembraneType1* _MemTypeAddr;
-// 	int*_MirrorIndexAddr ;
-// 	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
-// 	__host__ __device__ AddMemContractForce(uint maxNodePerCell,
-// 			uint maxMemNodePerCell, double* locXAddr, double* locYAddr, MembraneType1* MemTypeAddr, int* MirrorIndexAddr) :
-// 			_maxNodePerCell(maxNodePerCell), _maxMemNodePerCell(
-// 					maxMemNodePerCell), _locXAddr(locXAddr), _locYAddr(locYAddr),_MemTypeAddr(MemTypeAddr), _MirrorIndexAddr(MirrorIndexAddr) {
-// 	}
-// 	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
-// 	__device__ CVec6 operator()(const DUiDDUiUiBDDT & dUiDDUiUiBDDT ) const {
-// 		double nucDistToApical  = thrust::get<0>(dUiDDUiUiBDDT );
-// 		uint   activeMembrCount = thrust::get<1>(dUiDDUiUiBDDT );
-// 		double apicalX		    = thrust::get<2>(dUiDDUiUiBDDT);
-// 		double apicalY   		= thrust::get<3>(dUiDDUiUiBDDT );
-// 		uint   cellRank  		= thrust::get<4>(dUiDDUiUiBDDT );
-// 		uint   nodeRank  		= thrust::get<5>(dUiDDUiUiBDDT );
-// 		bool   isActive  		= thrust::get<6>(dUiDDUiUiBDDT );
-// 		double oriVelX   		= thrust::get<7>(dUiDDUiUiBDDT );
-// 		double oriVelY   		= thrust::get<8>(dUiDDUiUiBDDT );
-// 		MembraneType1 nodeType  = thrust::get<9>(dUiDDUiUiBDDT );
-		
-		
-// 		double F_MM_C_X=0 ; //AliA
-// 		double F_MM_C_Y=0 ; //AliA
-// 		double contractEnergyT=0.0 ; 
-		
-// 		double locX,locY,locXOther, locYOther;
-// 		uint   index ; 
-// 		int    index_Other ; 
-// 		MembraneType1 nodeTypeOther ;
-// 		int basalContractPairId=-1 ; 
-
-		
-// 		if ( isActive == false || nodeRank >= _maxMemNodePerCell  ) {
-// 			return thrust::make_tuple(oriVelX, oriVelY,0.0,0.0,0.0,basalContractPairId); //AliE
-// 		}
-// 				// means membrane node
-
-// 		index       = cellRank * _maxNodePerCell + nodeRank;
-// 		//if  (  (nodeType==lateralA) || (nodeType==lateralB) ) {
-// 		if  ( _MirrorIndexAddr[index] !=-1  ) { 
-// 			// This implies that this node is a lateral node of a symmetric pouch cell and because _MirrorIndexAddr is pairwise variable, then automatically action and
-// 			// reaction force condition is satisfied.
-// 			locX 		= _locXAddr[index];
-// 			locY 		= _locYAddr[index];
-// 			double nodeDistToApical=sqrt( ( locX-apicalX)*(locX-apicalX) + (locY-apicalY)*(locY-apicalY) )-2  ; // 2 is for saftey to make sure is beneath the nucleus  
-
-// 			index_Other =_MirrorIndexAddr[index]; 
-// 			locXOther   = _locXAddr[index_Other];
-// 			locYOther   = _locYAddr[index_Other];
-// 			double nodeDistToApicalOther=sqrt( (locXOther-apicalX)*(locXOther-apicalX) + (locYOther-apicalY)*(locYOther-apicalY) )-2 ; 
-
-// 			if ( (nodeDistToApical>nucDistToApical)&& (nodeDistToApicalOther>nucDistToApical) ) { 
-//             	calAndAddMM_ContractAdh(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y);
-// 				basalContractPairId=index_Other ; 
-// 			}
-
-// 			//finished calculating adhesion force
-// 			// start calculating Morse force. 
-// 			//It assumes that if mirror index of a lateral node of cell is not equal to -1, then the mirror index of all the other lateral nodes of the same cell is not equal to -1. By this restriction the action-reaction force constrain will be automatically satisfied.
-// 			uint memIndxBegin = cellRank * _maxNodePerCell;
-// 			uint memIndxEnd   = cellRank * _maxNodePerCell +activeMembrCount-1 ;
-// 			for (index_Other = memIndxBegin; index_Other <= memIndxEnd;index_Other++) {
-// 				locXOther = _locXAddr[index_Other];
-// 				locYOther = _locYAddr[index_Other];
-// 				double nodeDistToApicalOther=sqrt( (locXOther-apicalX)*(locXOther-apicalX) + (locYOther-apicalY)*(locYOther-apicalY) )-2 ;  
-		
-			 
-// 				nodeTypeOther= _MemTypeAddr[index_Other] ; 
-// 				if ( (nodeDistToApical>nucDistToApical)&& (nodeDistToApicalOther>nucDistToApical) ) { 
-	
-// 					if (  (nodeTypeOther==lateralB && nodeType==lateralA) || (nodeTypeOther==lateralA && nodeType==lateralB) )  {
-//                 		calAndAddMM_ContractRepl(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y);
-// 					}
-
-// 				}
-// 			}
-// 			return thrust::make_tuple(oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y,contractEnergyT,basalContractPairId);
-// 		} 
-// 		else {
-// 		    return thrust::make_tuple(oriVelX, oriVelY,0.0,0.0,0.0,basalContractPairId); //AliE
-// 		}
-// 	}
-// };
-// struct AddMemContractForce: public thrust::unary_function<DUiDDUiUiBDDT , CVec6> {
-// 	uint _maxNodePerCell;
-// 	uint _maxMemNodePerCell;
-// 	double* _locXAddr;
-// 	double* _locYAddr;
-// 	double* _ActomyosinMultipBasal;
-// 	double* _ActomyosinMultipApical;
-// 	MembraneType1* _MemTypeAddr;
-// 	int*_MirrorIndexAddr ;
-// 	double _timeRatio;
-// 	double _timeRatio_Crit_actomyo;
-// 	double _timeRatio_Crit_Division;
-// 	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
-// 	__host__ __device__ AddMemContractForce(uint maxNodePerCell,
-// 			uint maxMemNodePerCell, double* locXAddr, double* locYAddr, double* ActomyosinMultipBasal, double* ActomyosinMultipApical, MembraneType1* MemTypeAddr, int* MirrorIndexAddr, 
-// 										double timeRatio, double timeRatio_Crit_actomyo, double timeRatio_Crit_Division) :
-// 			_maxNodePerCell(maxNodePerCell), _maxMemNodePerCell(
-// 					maxMemNodePerCell), _locXAddr(locXAddr), _locYAddr(locYAddr),_ActomyosinMultipBasal(ActomyosinMultipBasal), _ActomyosinMultipApical(ActomyosinMultipApical),_MemTypeAddr(MemTypeAddr), _MirrorIndexAddr(MirrorIndexAddr), 
-// 										_timeRatio(timeRatio), _timeRatio_Crit_actomyo(timeRatio_Crit_actomyo), _timeRatio_Crit_Division(timeRatio_Crit_Division) {
-// 	}
-// 	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
-// 	__device__ CVec6 operator()(const DUiDDUiUiBDDT & dUiDDUiUiBDDT ) const {
-// 		double nucDistToApical  = thrust::get<0>(dUiDDUiUiBDDT );
-// 		uint   activeMembrCount = thrust::get<1>(dUiDDUiUiBDDT );
-// 		double apicalX		    = thrust::get<2>(dUiDDUiUiBDDT);
-// 		double apicalY   		= thrust::get<3>(dUiDDUiUiBDDT );
-// 		uint   cellRank  		= thrust::get<4>(dUiDDUiUiBDDT );
-// 		uint   nodeRank  		= thrust::get<5>(dUiDDUiUiBDDT );
-// 		bool   isActive  		= thrust::get<6>(dUiDDUiUiBDDT );
-// 		double oriVelX   		= thrust::get<7>(dUiDDUiUiBDDT );
-// 		double oriVelY   		= thrust::get<8>(dUiDDUiUiBDDT );
-// 		MembraneType1 nodeType  = thrust::get<9>(dUiDDUiUiBDDT );
-		
-		
-// 		double F_MM_C_X=0 ; //AliA
-// 		double F_MM_C_Y=0 ; //AliA
-// 		double contractEnergyT=0.0 ; 
-		
-// 		double locX,locY,locXOther, locYOther, kContrMemb_multip_basal, kContrMemb_multip_apical, kContrMemb_multip2_basal, kContrMemb_multip2_apical;
-// 		uint   index ; 
-// 		int    index_Other ; 
-// 		MembraneType1 nodeTypeOther ;
-// 		int basalContractPairId=-1 ; 
-
-// 		double DistFromNucleus;
-// 		double percentage_before_timeRatio_Crit_Division_scaling = 2.0;
-// 		//This number determines the maximum multiple applied to the basal contractility strength.
-// 		//For instance, if it equals to 1.0, it means that we want a maximum of doubling the basal contractility strength.
-// 		//And if it equals 2.0, it means that we want a maximum of tripling the basal contractility strength.
-// 		//See "kContrMemb_multip_basal = _ActomyosinMultipBasal[index]*(1 + 2*percentage_past_timeRatio_Crit);" line for the concept.
-// 		double percentage_before_timeRatio_Crit_Division = (_timeRatio)/(_timeRatio_Crit_Division);
-		
-// 		if (1<0){
-// 		// if (cellRank == 31 && _timeRatio <= _timeRatio_Crit_Division){
-// 			DistFromNucleus = -2.0 + (7.0 - (-2.0))*(2.0)*percentage_before_timeRatio_Crit_Division; 
-// 			//For now we will assuume that new contractile springs are being constructed twice as fast.
-// 			if (DistFromNucleus >= 7.0){
-// 				DistFromNucleus = 7.0;
-// 			}
-// 		}
-// 		else{
-// 			DistFromNucleus = -2.0;
-// 		}
-
-// 		if ( isActive == false || nodeRank >= _maxMemNodePerCell  ) {
-// 			return thrust::make_tuple(oriVelX, oriVelY,0.0,0.0,0.0,basalContractPairId); //AliE
-// 		}
-// 				// means membrane node
-
-// 		index       = cellRank * _maxNodePerCell + nodeRank;
-// 		//if  (  (nodeType==lateralA) || (nodeType==lateralB) ) {
-// 		if  ( _MirrorIndexAddr[index] !=-1  ) { 
-// 			// This implies that this node is a lateral node of a symmetric pouch cell and because _MirrorIndexAddr is pairwise variable, then automatically action and
-// 			// reaction force condition is satisfied.
-// 			locX 		= _locXAddr[index];
-// 			locY 		= _locYAddr[index];
-// 			// locZ		= _locZAddr[index];
-// 			if (_timeRatio < _timeRatio_Crit_actomyo){
-// 				kContrMemb_multip_basal = 1.0;
-// 				// kContrMemb_multip_apical = 0.0;
-// 				if (cellRank==31 && _timeRatio < _timeRatio_Crit_Division){
-				
-// 					double spectrum = (_ActomyosinMultipBasal[index]*(percentage_before_timeRatio_Crit_Division_scaling + 1) - _ActomyosinMultipBasal[index]);
-// 					kContrMemb_multip_basal = _ActomyosinMultipBasal[index] + spectrum*2*percentage_before_timeRatio_Crit_Division;
-// 					// kContrMemb_multip_basal = _ActomyosinMultipBasal[index]*(1 + 2*percentage_past_timeRatio_Crit);
-// 					if (kContrMemb_multip_basal >= _ActomyosinMultipBasal[index]*(percentage_before_timeRatio_Crit_Division_scaling + 1)){
-// 						kContrMemb_multip_basal = _ActomyosinMultipBasal[index]*(percentage_before_timeRatio_Crit_Division_scaling + 1);
-// 					}
-				
-// 				// The rate of increased contractility is also doubled for now.
-// 				// kContrMemb_multip_apical = _ActomyosinMultipApical[index];
-// 				}
-// 			}
-// 			else{
-// 				kContrMemb_multip_basal = _ActomyosinMultipBasal[index];
-// 				// kContrMemb_multip_apical = _ActomyosinMultipApical[index];
-// 				if (cellRank==31 && _timeRatio < _timeRatio_Crit_Division){
-				
-// 					double spectrum = (_ActomyosinMultipBasal[index]*(percentage_before_timeRatio_Crit_Division_scaling + 1) - _ActomyosinMultipBasal[index]);
-// 					kContrMemb_multip_basal = _ActomyosinMultipBasal[index] + spectrum*2*percentage_before_timeRatio_Crit_Division;
-// 					// kContrMemb_multip_basal = _ActomyosinMultipBasal[index]*(1 + 2*percentage_past_timeRatio_Crit);
-// 					if (kContrMemb_multip_basal >= _ActomyosinMultipBasal[index]*(percentage_before_timeRatio_Crit_Division_scaling + 1)){
-// 						kContrMemb_multip_basal = _ActomyosinMultipBasal[index]*(percentage_before_timeRatio_Crit_Division_scaling + 1);
-// 					}
-				
-// 				// The rate of increased contractility is also doubled for now.
-// 				// kContrMemb_multip_apical = _ActomyosinMultipApical[index];
-// 				}
-// 			}
-// 			// double nodeDistToApical=sqrt( ( locX-apicalX)*(locX-apicalX) + (locY-apicalY)*(locY-apicalY) )-2  ; // 2 is for saftey to make sure is beneath the nucleus  
-// 			double nodeDistToApical=sqrt( ( locX-apicalX)*(locX-apicalX) + (locY-apicalY)*(locY-apicalY) ); //12/01/2020, edited by Kevin. We will remove the -2 and relocate it too where we are comparing with the nucDistToApical.
-// 			index_Other =_MirrorIndexAddr[index]; 
-// 			locXOther   = _locXAddr[index_Other];
-// 			locYOther   = _locYAddr[index_Other];
-// 			// locZOther	= _locZAddr[index_Other];
-// 			if (_timeRatio < _timeRatio_Crit_actomyo){
-// 				kContrMemb_multip2_basal = 1.0;
-// 				// kContrMemb_multip2_apical = 0.0;
-// 				if (cellRank==31 && _timeRatio < _timeRatio_Crit_Division){
-				
-// 					double spectrum = (_ActomyosinMultipBasal[index_Other]*(percentage_before_timeRatio_Crit_Division_scaling + 1) - _ActomyosinMultipBasal[index_Other]);
-// 					kContrMemb_multip2_basal = _ActomyosinMultipBasal[index_Other] + spectrum*1*percentage_before_timeRatio_Crit_Division;
-// 					// kContrMemb_multip2_basal = _ActomyosinMultipBasal[index_Other]*(1 + 2*percentage_past_timeRatio_Crit);
-// 					if (kContrMemb_multip2_basal >= _ActomyosinMultipBasal[index_Other]*(percentage_before_timeRatio_Crit_Division_scaling + 1)){
-// 						kContrMemb_multip2_basal = _ActomyosinMultipBasal[index_Other]*(percentage_before_timeRatio_Crit_Division_scaling + 1);
-// 					}
-				
-// 				// The rate of increased contractility is also doubled for now.
-// 				// kContrMemb_multip_apical = _ActomyosinMultipApical[index];
-// 				}
-// 			}
-// 			else{
-// 				kContrMemb_multip2_basal = _ActomyosinMultipBasal[index_Other];
-// 				// kContrMemb_multip2_apical = _ActomyosinMultipApical[index_Other];
-// 				if (cellRank==31 && _timeRatio < _timeRatio_Crit_Division){
-				
-// 					double spectrum = (_ActomyosinMultipBasal[index_Other]*(percentage_before_timeRatio_Crit_Division_scaling + 1) - _ActomyosinMultipBasal[index_Other]);
-// 					kContrMemb_multip2_basal = _ActomyosinMultipBasal[index_Other] + spectrum*1*percentage_before_timeRatio_Crit_Division;
-// 					// kContrMemb_multip2_basal = _ActomyosinMultipBasal[index_Other]*(1 + 2*percentage_past_timeRatio_Crit);
-// 					if (kContrMemb_multip2_basal >= _ActomyosinMultipBasal[index_Other]*(percentage_before_timeRatio_Crit_Division_scaling + 1)){
-// 						kContrMemb_multip2_basal = _ActomyosinMultipBasal[index_Other]*(percentage_before_timeRatio_Crit_Division_scaling + 1);
-// 					}
-				
-// 				// The rate of increased contractility is also doubled for now.
-// 				// kContrMemb_multip_apical = _ActomyosinMultipApical[index];
-// 				}
-// 			}
-// 			// double nodeDistToApicalOther=sqrt( (locXOther-apicalX)*(locXOther-apicalX) + (locYOther-apicalY)*(locYOther-apicalY) )-2 ; 
-// 			double nodeDistToApicalOther=sqrt( (locXOther-apicalX)*(locXOther-apicalX) + (locYOther-apicalY)*(locYOther-apicalY) ); //12/01/2020, edited by Kevin.
-
-// 			// if ( (nodeDistToApical>nucDistToApical)&& (nodeDistToApicalOther>nucDistToApical) ) { 
-// 			// if ( ((nodeDistToApical-2)>nucDistToApical)&& ((nodeDistToApicalOther-2)>nucDistToApical) ) { 
-//             // 	calAndAddMM_ContractAdh(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y,kContrMemb_multip_basal, kContrMemb_multip2_basal);
-// 			// 	basalContractPairId=index_Other ; 
-// 			// }
-// 			if ( ((nodeDistToApical+DistFromNucleus)>nucDistToApical)&& ((nodeDistToApicalOther+DistFromNucleus)>nucDistToApical) ) { 
-				
-// 					calAndAddMM_ContractAdh(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y,kContrMemb_multip_basal, kContrMemb_multip2_basal);
-// 					basalContractPairId=index_Other ;
-				
-// 			}
-// 			// // if ( (nodeDistToApical<nucDistToApical)&& (nodeDistToApicalOther<nucDistToApical) ) { 
-// 			// else if ( ((nodeDistToApical+2)<nucDistToApical)&& ((nodeDistToApicalOther+2)<nucDistToApical) ) { 
-//             // 	calAndAddMM_ContractAdh(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y,kContrMemb_multip_apical, kContrMemb_multip2_apical);
-// 			// 	basalContractPairId=index_Other ; 
-// 			// }
-
-// 			//finished calculating adhesion force
-// 			// start calculating Morse force. 
-// 			//It assumes that if mirror index of a lateral node of cell is not equal to -1, then the mirror index of all the other lateral nodes of the same cell is not equal to -1. By this restriction the action-reaction force constrain will be automatically satisfied.
-// 			uint memIndxBegin = cellRank * _maxNodePerCell;
-// 			uint memIndxEnd   = cellRank * _maxNodePerCell +activeMembrCount-1 ;
-// 			for (index_Other = memIndxBegin; index_Other <= memIndxEnd;index_Other++) {
-// 				locXOther = _locXAddr[index_Other];
-// 				locYOther = _locYAddr[index_Other];
-// 				// double nodeDistToApicalOther=sqrt( (locXOther-apicalX)*(locXOther-apicalX) + (locYOther-apicalY)*(locYOther-apicalY) )-2 ;  
-// 				double nodeDistToApicalOther=sqrt( (locXOther-apicalX)*(locXOther-apicalX) + (locYOther-apicalY)*(locYOther-apicalY) ); //12/01/2020, edited by Kevin.  
-		
-			 
-// 				nodeTypeOther= _MemTypeAddr[index_Other] ; 
-// 				// if ( (nodeDistToApical>nucDistToApical)&& (nodeDistToApicalOther>nucDistToApical) ) { 
-// 				// if ( ((nodeDistToApical-2)>nucDistToApical)&& ((nodeDistToApicalOther-2)>nucDistToApical) ) { 
-// 				// 	if (  (nodeTypeOther==lateralB && nodeType==lateralA) || (nodeTypeOther==lateralA && nodeType==lateralB) )  {
-//                 // 		calAndAddMM_ContractRepl(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y);
-// 				// 	}
-
-// 				// }
-// 				if ( ((nodeDistToApical + DistFromNucleus) > nucDistToApical)&& 
-// 					((nodeDistToApicalOther + DistFromNucleus) > nucDistToApical) ) { 
-// 					if (  (nodeTypeOther==lateralB && nodeType==lateralA) || (nodeTypeOther==lateralA && nodeType==lateralB) )  {
-//                 		calAndAddMM_ContractRepl(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y);
-// 					}
-
-// 				}
-// 				// // if ( (nodeDistToApical<nucDistToApical)&& (nodeDistToApicalOther<nucDistToApical) ) { 
-// 				// else if ( ((nodeDistToApical+2)<nucDistToApical)&& ((nodeDistToApicalOther+2)<nucDistToApical) ) { 
-	
-// 				// 	if (  (nodeTypeOther==lateralB && nodeType==lateralA) || (nodeTypeOther==lateralA && nodeType==lateralB) )  {
-//                 // 		calAndAddMM_ContractRepl(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y);
-// 				// 	}
-
-// 				// }
-// 			}
-// 			return thrust::make_tuple(oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y,contractEnergyT,basalContractPairId);
-// 		} 
-// 		else {
-// 		    return thrust::make_tuple(oriVelX, oriVelY,0.0,0.0,0.0,basalContractPairId); //AliE
-// 		}
-// 	}
-// };
-
-// struct AddMemContractForce_tmp: public thrust::unary_function<DUiDDUiUiBDDT , CVec6> {
-// 	uint _maxNodePerCell;
-// 	uint _maxMemNodePerCell;
-// 	double* _locXAddr;
-// 	double* _locYAddr;
-// 	MembraneType1* _MemTypeAddr;
-// 	int*_MirrorIndexAddr ;
-// 	double _timeRatio;
-// 	double* _contractActomyo_multip;
-// 	double* _contractActomyo_multip_apical;
-// 	double _distFromNucleus_max;
-// 	double _distFromNucleus_min;
-// 	double* _distFromNucleus_normal;
-// 	double* _distFromNucleus_normal_apical;
-// 	double _percentage_before_timeRatio_Crit_Division_scaling;
-// 	bool* _isEnteringMitotic;
-// 	double* _contractileSpringGrowthProgress;
-// 	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
-// 	__host__ __device__ AddMemContractForce_tmp(uint maxNodePerCell, uint maxMemNodePerCell, double* locXAddr, double* locYAddr, MembraneType1* MemTypeAddr, int* MirrorIndexAddr, 
-// 										double timeRatio,  double* contractActomyo_multip, double* contractActomyo_multip_apical, double distFromNucleus_max, double distFromNucleus_min, double* distFromNucleus_normal, double* distFromNucleus_normal_apical,
-// 										double percentage_before_timeRatio_Crit_Division_scaling, bool* isEnteringMitotic, double* contractileSpringGrowthProgress) :
-// 			_maxNodePerCell(maxNodePerCell), _maxMemNodePerCell(
-// 					maxMemNodePerCell), _locXAddr(locXAddr), _locYAddr(locYAddr),_MemTypeAddr(MemTypeAddr), _MirrorIndexAddr(MirrorIndexAddr), 
-// 										_timeRatio(timeRatio), _contractActomyo_multip(contractActomyo_multip),_contractActomyo_multip_apical(contractActomyo_multip_apical),
-// 										_distFromNucleus_max(distFromNucleus_max), _distFromNucleus_min(distFromNucleus_min), _distFromNucleus_normal(distFromNucleus_normal), _distFromNucleus_normal_apical(distFromNucleus_normal_apical),
-// 										_percentage_before_timeRatio_Crit_Division_scaling(percentage_before_timeRatio_Crit_Division_scaling),
-// 										_isEnteringMitotic(isEnteringMitotic),
-// 										_contractileSpringGrowthProgress(contractileSpringGrowthProgress) {
-// 	}
-// 	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
-// 	__device__ CVec6 operator()(const DUiDDUiUiBDDT & dUiDDUiUiBDDT ) const {
-// 		double nucDistToApical  = thrust::get<0>(dUiDDUiUiBDDT );
-// 		uint   activeMembrCount = thrust::get<1>(dUiDDUiUiBDDT );
-// 		double apicalX		    = thrust::get<2>(dUiDDUiUiBDDT);
-// 		double apicalY   		= thrust::get<3>(dUiDDUiUiBDDT );
-// 		uint   cellRank  		= thrust::get<4>(dUiDDUiUiBDDT );
-// 		uint   nodeRank  		= thrust::get<5>(dUiDDUiUiBDDT );
-// 		bool   isActive  		= thrust::get<6>(dUiDDUiUiBDDT );
-// 		double oriVelX   		= thrust::get<7>(dUiDDUiUiBDDT );
-// 		double oriVelY   		= thrust::get<8>(dUiDDUiUiBDDT );
-// 		MembraneType1 nodeType  = thrust::get<9>(dUiDDUiUiBDDT );
-		
-		
-// 		double F_MM_C_X=0 ; //AliA
-// 		double F_MM_C_Y=0 ; //AliA
-// 		double contractEnergyT=0.0 ; 
-		
-// 		double locX,locY,locXOther, locYOther, kContrMemb_multip_basal, kContrMemb_multip_apical, kContrMemb_multip2_basal, kContrMemb_multip2_apical;
-// 		uint   index ; 
-// 		int    index_Other ; 
-// 		MembraneType1 nodeTypeOther ;
-// 		int basalContractPairId=-1 ; 
-
-// 		double DistFromNucleus, DistFromNucleus_apical;
-// 		// double DistFromNucleus_max = 7.0;
-// 		// double DistFromNucleus_min = -7.0;
-// 		// double percentage_before_timeRatio_Crit_Division_scaling = 4.0;
-// 		//This number determines the maximum multiple applied to the basal contractility strength.
-// 		//For instance, if it equals to 1.0, it means that we want a maximum of no change in the basal contractility strength.
-// 		//And if it equals 2.0, it means that we want a maximum of doubling the basal contractility strength.
-// 		//See "kContrMemb_multip_basal = _ActomyosinMultipBasal[index]*(1 + 2*percentage_past_timeRatio_Crit);" line for the concept.
-// 		// double percentage_before_timeRatio_Crit_Division = (_timeRatio)/(_timeRatio_Crit_Division);
-		
-// 		// if (1<0){
-// 		// if (cellRank == _cellRank_division && _timeRatio <= _timeRatio_Crit_Division){
-// 		if (_isEnteringMitotic[cellRank] == true){
-// 			DistFromNucleus = _distFromNucleus_min + _contractileSpringGrowthProgress[cellRank];
-// 			DistFromNucleus_apical = 99999.9;
-// 			if (DistFromNucleus >= _distFromNucleus_max){
-// 				DistFromNucleus = _distFromNucleus_max;
-// 			}
-// 		}
-// 		else{
-// 			DistFromNucleus = _distFromNucleus_normal[cellRank];
-// 			// DistFromNucleus_apical = -1.0*_distFromNucleus_normal[cellRank];
-// 			DistFromNucleus_apical = _distFromNucleus_normal_apical[cellRank];
-// 		}
-// 		// if (_timeRatio == 0 && nodeRank == 0 && cellRank == 0){
-// 		// 	std::cout<<"Cell division requires the contractile spring to increase strength by "<<percentage_before_timeRatio_Crit_Division_scaling<<" fold."<<std::endl;
-// 		// 	std::cout<<"Contractile spring minimum at "<<DistFromNucleus_min<<" and maximum at "<<DistFromNucleus_max<<" away from the cell center."<<std::endl;
-// 		// }
-
-// 		if ( isActive == false || nodeRank >= _maxMemNodePerCell  ) {
-// 			return thrust::make_tuple(oriVelX, oriVelY,0.0,0.0,0.0,basalContractPairId); //AliE
-// 		}
-// 				// means membrane node
-
-// 		index       = cellRank * _maxNodePerCell + nodeRank;
-// 		//if  (  (nodeType==lateralA) || (nodeType==lateralB) ) {
-// 		if  ( _MirrorIndexAddr[index] !=-1  ) { 
-// 			// This implies that this node is a lateral node of a symmetric pouch cell and because _MirrorIndexAddr is pairwise variable, then automatically action and
-// 			// reaction force condition is satisfied.
-// 			locX 		= _locXAddr[index];
-// 			locY 		= _locYAddr[index];
-// 			// locZ		= _locZAddr[index];
-// 			// if (_timeRatio < _timeRatio_Crit_actomyo){
-// 				kContrMemb_multip_basal = _contractActomyo_multip[index];
-// 				kContrMemb_multip_apical = _contractActomyo_multip_apical[index];
-// 				// kContrMemb_multip_apical = 0.0;
-// 				// if (cellRank==_cellRank_division && _timeRatio < _timeRatio_Crit_Division){
-// 				if (_isEnteringMitotic[cellRank] == true){
-// 					// double spectrum = (1*(_percentage_before_timeRatio_Crit_Division_scaling/_contractActomyo_multip[index]) - 1);
-// 					kContrMemb_multip_basal = _contractActomyo_multip[index]*(_percentage_before_timeRatio_Crit_Division_scaling/_contractActomyo_multip[index]);
-// 					// kContrMemb_multip_basal = _ActomyosinMultipBasal[index]*(1 + 2*percentage_past_timeRatio_Crit);
-// 					kContrMemb_multip_apical = 0.0;
-// 					if (kContrMemb_multip_basal >= _contractActomyo_multip[index]*(_percentage_before_timeRatio_Crit_Division_scaling/_contractActomyo_multip[index])){
-// 						kContrMemb_multip_basal = _contractActomyo_multip[index]*(_percentage_before_timeRatio_Crit_Division_scaling/_contractActomyo_multip[index]);
-// 					}
-				
-// 				// The rate of increased contractility is also doubled for now.
-// 				// kContrMemb_multip_apical = _ActomyosinMultipApical[index];
-// 				}
-// 			// }
-			
-// 			// double nodeDistToApical=sqrt( ( locX-apicalX)*(locX-apicalX) + (locY-apicalY)*(locY-apicalY) )-2  ; // 2 is for saftey to make sure is beneath the nucleus  
-// 			double nodeDistToApical=sqrt( ( locX-apicalX)*(locX-apicalX) + (locY-apicalY)*(locY-apicalY) ); //12/01/2020, edited by Kevin. We will remove the -2 and relocate it too where we are comparing with the nucDistToApical.
-			
-// 			index_Other =_MirrorIndexAddr[index]; 
-// 			locXOther   = _locXAddr[index_Other];
-// 			locYOther   = _locYAddr[index_Other];
-// 			// locZOther	= _locZAddr[index_Other];
-// 			// if (_timeRatio < _timeRatio_Crit_actomyo){
-// 				kContrMemb_multip2_basal = _contractActomyo_multip[index_Other];
-// 				kContrMemb_multip2_apical = _contractActomyo_multip_apical[index_Other];
-// 				// kContrMemb_multip2_apical = 0.0;
-// 				// if (cellRank==_cellRank_division && _timeRatio < _timeRatio_Crit_Division){
-// 				if (_isEnteringMitotic[cellRank] == true){
-// 					// double spectrum = (1*(_percentage_before_timeRatio_Crit_Division_scaling/_contractActomyo_multip[index]) - 1);
-// 					kContrMemb_multip2_basal = _contractActomyo_multip[index_Other]*(_percentage_before_timeRatio_Crit_Division_scaling/_contractActomyo_multip[index]);
-// 					// kContrMemb_multip2_basal = _ActomyosinMultipBasal[index_Other]*(1 + 2*percentage_past_timeRatio_Crit);
-// 					if (kContrMemb_multip2_basal >= _contractActomyo_multip[index_Other]*(_percentage_before_timeRatio_Crit_Division_scaling/_contractActomyo_multip[index])){
-// 						kContrMemb_multip2_basal = _contractActomyo_multip[index_Other]*(_percentage_before_timeRatio_Crit_Division_scaling/_contractActomyo_multip[index]);
-// 					}
-				
-// 				// The rate of increased contractility is also doubled for now.
-// 				// kContrMemb_multip_apical = _ActomyosinMultipApical[index];
-// 				}
-// 			// }
-// 			// double nodeDistToApicalOther=sqrt( (locXOther-apicalX)*(locXOther-apicalX) + (locYOther-apicalY)*(locYOther-apicalY) )-2 ; 
-// 			double nodeDistToApicalOther=sqrt( (locXOther-apicalX)*(locXOther-apicalX) + (locYOther-apicalY)*(locYOther-apicalY) ); //12/01/2020, edited by Kevin.
-
-// 			// if ( (nodeDistToApical>nucDistToApical)&& (nodeDistToApicalOther>nucDistToApical) ) { 
-// 			// if ( ((nodeDistToApical-2)>nucDistToApical)&& ((nodeDistToApicalOther-2)>nucDistToApical) ) { 
-//             // 	calAndAddMM_ContractAdh(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y,kContrMemb_multip_basal, kContrMemb_multip2_basal);
-// 			// 	basalContractPairId=index_Other ; 
-// 			// }
-// 			if ( ((nodeDistToApical+DistFromNucleus)>nucDistToApical)&& ((nodeDistToApicalOther+DistFromNucleus)>nucDistToApical) ) { 
-				
-// 					calAndAddMM_ContractAdh(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y,kContrMemb_multip_basal, kContrMemb_multip2_basal);
-// 					basalContractPairId=index_Other ;
-				
-// 			}
-// 			if ( ((nodeDistToApical+DistFromNucleus_apical)<nucDistToApical)&& ((nodeDistToApicalOther+DistFromNucleus_apical)<nucDistToApical) ) { 
-				
-// 					calAndAddMM_ContractAdh(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y,kContrMemb_multip_apical, kContrMemb_multip2_apical);
-// 					basalContractPairId=index_Other ;
-				
-// 			}
-// 			// // if ( (nodeDistToApical<nucDistToApical)&& (nodeDistToApicalOther<nucDistToApical) ) { 
-// 			// else if ( ((nodeDistToApical+2)<nucDistToApical)&& ((nodeDistToApicalOther+2)<nucDistToApical) ) { 
-//             // 	calAndAddMM_ContractAdh(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y,kContrMemb_multip_apical, kContrMemb_multip2_apical);
-// 			// 	basalContractPairId=index_Other ; 
-// 			// }
-
-// 			//finished calculating adhesion force
-// 			// start calculating Morse force. 
-// 			//It assumes that if mirror index of a lateral node of cell is not equal to -1, then the mirror index of all the other lateral nodes of the same cell is not equal to -1. By this restriction the action-reaction force constrain will be automatically satisfied.
-// 			uint memIndxBegin = cellRank * _maxNodePerCell;
-// 			uint memIndxEnd   = cellRank * _maxNodePerCell +activeMembrCount-1 ;
-// 			for (index_Other = memIndxBegin; index_Other <= memIndxEnd;index_Other++) {
-// 				locXOther = _locXAddr[index_Other];
-// 				locYOther = _locYAddr[index_Other];
-// 				// double nodeDistToApicalOther=sqrt( (locXOther-apicalX)*(locXOther-apicalX) + (locYOther-apicalY)*(locYOther-apicalY) )-2 ;  
-// 				double nodeDistToApicalOther=sqrt( (locXOther-apicalX)*(locXOther-apicalX) + (locYOther-apicalY)*(locYOther-apicalY) ); //12/01/2020, edited by Kevin.  
-		
-			 
-// 				nodeTypeOther= _MemTypeAddr[index_Other] ; 
-// 				// if ( (nodeDistToApical>nucDistToApical)&& (nodeDistToApicalOther>nucDistToApical) ) { 
-// 				// if ( ((nodeDistToApical-2)>nucDistToApical)&& ((nodeDistToApicalOther-2)>nucDistToApical) ) { 
-// 				// 	if (  (nodeTypeOther==lateralB && nodeType==lateralA) || (nodeTypeOther==lateralA && nodeType==lateralB) )  {
-//                 // 		calAndAddMM_ContractRepl(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y);
-// 				// 	}
-
-// 				// }
-// 				if ( ((nodeDistToApical + DistFromNucleus) > nucDistToApical)&& 
-// 					((nodeDistToApicalOther + DistFromNucleus) > nucDistToApical) ) { 
-// 					if (  (nodeTypeOther==lateralB && nodeType==lateralA) || (nodeTypeOther==lateralA && nodeType==lateralB) )  {
-//                 		calAndAddMM_ContractRepl(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y);
-// 					}
-
-// 				}
-// 				if ( ((nodeDistToApical + DistFromNucleus_apical) < nucDistToApical)&& 
-// 					((nodeDistToApicalOther + DistFromNucleus_apical) < nucDistToApical) ) { 
-// 					if (  (nodeTypeOther==lateralB && nodeType==lateralA) || (nodeTypeOther==lateralA && nodeType==lateralB) )  {
-//                 		calAndAddMM_ContractRepl(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y);
-// 					}
-
-// 				}
-// 				// // if ( (nodeDistToApical<nucDistToApical)&& (nodeDistToApicalOther<nucDistToApical) ) { 
-// 				// else if ( ((nodeDistToApical+2)<nucDistToApical)&& ((nodeDistToApicalOther+2)<nucDistToApical) ) { 
-	
-// 				// 	if (  (nodeTypeOther==lateralB && nodeType==lateralA) || (nodeTypeOther==lateralA && nodeType==lateralB) )  {
-//                 // 		calAndAddMM_ContractRepl(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y);
-// 				// 	}
-
-// 				// }
-// 			}
-// 			return thrust::make_tuple(oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y,contractEnergyT,basalContractPairId);
-// 		} 
-// 		else {
-// 		    return thrust::make_tuple(oriVelX, oriVelY,0.0,0.0,0.0,basalContractPairId); //AliE
-// 		}
-// 	}
-// };
-
 struct AddMemContractForce_tmp2: public thrust::unary_function<DUiDDUiUiBDDT , CVec6> {
 	uint _maxNodePerCell;
 	uint _maxMemNodePerCell;
@@ -2311,18 +1650,7 @@ struct AddMemContractForce_tmp2: public thrust::unary_function<DUiDDUiUiBDDT , C
 			// if (distMinApicalContrSpringToApical >= distMinApicalContrSpringToApical_longest){
 				distMinApicalContrSpringToApical = distMinApicalContrSpringToApical_longest;
 			// }
-
-			/*// DistFromNucleus = _distFromNucleus_normal[cellRank];
-			// DistFromNucleus_apical = _distFromNucleus_normal_apical[cellRank];
-			// if (cellRank >= 28 & cellRank <=34){
-			// 	distMinApicalContrSpringToApical = -9999.9;
-			// 	distMaxBasalContrSpringToApical = 9999.9;
-			// }*/
 		}
-		// if (_timeRatio == 0 && nodeRank == 0 && cellRank == 0){
-		// 	std::cout<<"Cell division requires the contractile spring to increase strength by "<<percentage_before_timeRatio_Crit_Division_scaling<<" fold."<<std::endl;
-		// 	std::cout<<"Contractile spring minimum at "<<DistFromNucleus_min<<" and maximum at "<<DistFromNucleus_max<<" away from the cell center."<<std::endl;
-		// }
 
 		if ( isActive == false || nodeRank >= _maxMemNodePerCell  ) {
 			return thrust::make_tuple(oriVelX, oriVelY,0.0,0.0,0.0,basalContractPairId); //AliE
@@ -2384,11 +1712,6 @@ struct AddMemContractForce_tmp2: public thrust::unary_function<DUiDDUiUiBDDT , C
 			// double nodeDistToApicalOther=sqrt( (locXOther-apicalX)*(locXOther-apicalX) + (locYOther-apicalY)*(locYOther-apicalY) )-2 ; 
 			double nodeDistToApicalOther=sqrt( (locXOther-apicalX)*(locXOther-apicalX) + (locYOther-apicalY)*(locYOther-apicalY) ); //12/01/2020, edited by Kevin.
 
-			// if ( (nodeDistToApical>nucDistToApical)&& (nodeDistToApicalOther>nucDistToApical) ) { 
-			// if ( ((nodeDistToApical-2)>nucDistToApical)&& ((nodeDistToApicalOther-2)>nucDistToApical) ) { 
-            // 	calAndAddMM_ContractAdh(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y,kContrMemb_multip_basal, kContrMemb_multip2_basal);
-			// 	basalContractPairId=index_Other ; 
-			// }
 			if ( ((nodeDistToApical) > distMaxBasalContrSpringToApical)&& ((nodeDistToApicalOther) > distMaxBasalContrSpringToApical) ) { 
 				
 					calAndAddMM_ContractAdh(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y,kContrMemb_multip_basal, kContrMemb_multip2_basal);
@@ -2401,11 +1724,6 @@ struct AddMemContractForce_tmp2: public thrust::unary_function<DUiDDUiUiBDDT , C
 					basalContractPairId=index_Other ;
 				
 			}
-			// // if ( (nodeDistToApical<nucDistToApical)&& (nodeDistToApicalOther<nucDistToApical) ) { 
-			// else if ( ((nodeDistToApical+2)<nucDistToApical)&& ((nodeDistToApicalOther+2)<nucDistToApical) ) { 
-            // 	calAndAddMM_ContractAdh(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y,kContrMemb_multip_apical, kContrMemb_multip2_apical);
-			// 	basalContractPairId=index_Other ; 
-			// }
 
 			//finished calculating adhesion force
 			// start calculating Morse force. 
@@ -2420,36 +1738,14 @@ struct AddMemContractForce_tmp2: public thrust::unary_function<DUiDDUiUiBDDT , C
 		
 			 
 				nodeTypeOther= _MemTypeAddr[index_Other] ; 
-				// if ( (nodeDistToApical>nucDistToApical)&& (nodeDistToApicalOther>nucDistToApical) ) { 
-				// if ( ((nodeDistToApical-2)>nucDistToApical)&& ((nodeDistToApicalOther-2)>nucDistToApical) ) { 
-				// 	if (  (nodeTypeOther==lateralB && nodeType==lateralA) || (nodeTypeOther==lateralA && nodeType==lateralB) )  {
-                // 		calAndAddMM_ContractRepl(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y);
-				// 	}
 
-				// }
-				// if ( ((nodeDistToApical) > distMaxBasalContrSpringToApical)&& 
-				// 	((nodeDistToApicalOther) > distMaxBasalContrSpringToApical) ) { 
-				// 	if (  (nodeTypeOther==lateralB && nodeType==lateralA) || (nodeTypeOther==lateralA && nodeType==lateralB) )  {
-                // 		calAndAddMM_ContractRepl(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y);
-				// 	}
-
-				// }
-				// if ( ((nodeDistToApical) < distMinApicalContrSpringToApical)&& 
-				// 	((nodeDistToApicalOther) < distMinApicalContrSpringToApical) ) {
 				if  (((nodeDistToApical) < 9999.9) && ((nodeDistToApicalOther) < 9999.9) ) { 
 					if (  (nodeTypeOther==lateralB && nodeType==lateralA) || (nodeTypeOther==lateralA && nodeType==lateralB) )  {
                 		calAndAddMM_ContractRepl(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y);
 					}
 
 				}
-				// // if ( (nodeDistToApical<nucDistToApical)&& (nodeDistToApicalOther<nucDistToApical) ) { 
-				// else if ( ((nodeDistToApical+2)<nucDistToApical)&& ((nodeDistToApicalOther+2)<nucDistToApical) ) { 
-	
-				// 	if (  (nodeTypeOther==lateralB && nodeType==lateralA) || (nodeTypeOther==lateralA && nodeType==lateralB) )  {
-                // 		calAndAddMM_ContractRepl(locX, locY, locXOther, locYOther,oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y);
-				// 	}
 
-				// }
 			}
 			return thrust::make_tuple(oriVelX, oriVelY,F_MM_C_X,F_MM_C_Y,contractEnergyT,basalContractPairId);
 		} 
@@ -2488,9 +1784,6 @@ struct AddNucleusForce: public thrust::unary_function<DDDBDDDD, CVec2> {
 		}
 	}
 };
-
-
-
 
 
 
@@ -2738,25 +2031,10 @@ struct MemGrowFunc: public thrust::unary_function<UiDDBoolIITI, BoolDII> {
 				else if (newNodeType == basal1 && numBasalNode < _maxApicalBasalNodeNum){
 					return thrust::make_tuple(true, 0, numApicalNode, numBasalNode+1);
 				}
-				// else if (cellRank == 0 && newNodeType != apical1 && newNodeType != basal1){
-				// 	return thrust::make_tuple(true, 0, numApicalNode, numBasalNode);
-				// }
-				// else if (cellRank == 1 && newNodeType != apical1 && newNodeType != basal1){
-				// 	return thrust::make_tuple(true, 0, numApicalNode, numBasalNode);
-				// }
-				// else if (cellRank == 63 && newNodeType != apical1 && newNodeType != basal1){
-				// 	return thrust::make_tuple(true, 0, numApicalNode, numBasalNode);
-				// }
-				// else if (cellRank == 64 && newNodeType != apical1 && newNodeType != basal1){
-				// 	return thrust::make_tuple(true, 0, numApicalNode, numBasalNode);
-				// }
 				else{
 					return thrust::make_tuple(false, 0, numApicalNode, numBasalNode);
 				}
 			}
-			//	else if (curActiveMembrNode < _bound  && LengthMax>0.15 && cellProgress>0.05)  {   // to not add new node for recently divided cells.
-			//	return thrust::make_tuple(true, 0);
-		//	} 
 			else {
 				// return thrust::make_tuple(false, progress);
 				return thrust::make_tuple(false, 0, numApicalNode, numBasalNode);
@@ -3009,46 +2287,6 @@ struct IsBoundary: public thrust::unary_function<SceNodeType, bool> {
  * @param _nodeXPosAddress pointer to the begining of vector nodeLocX of SceNodes
  * @param _nodeYPosAddress pointer to the begining of vector nodeLocY of SceNodes
  */
-
-// struct progress_BCImp: thrust::unary_function<DDUi, double> {
-
-// 	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
-	
-// 	double _dt;
-// 	// comment prevents bad formatting issues of __host__ and __device__ in Nsight__host__ __device__
-// 	__host__ __device__ progress_BCImp(double dt) :
-// 			_dt(dt) {
-// 	}
-
-
-// 	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
-// 	__device__ double operator()(const DDUi &ddi) {
-// 		double growProgressOld = thrust::get<0>(ddi);
-// 		// double growSpeed = thrust::get<1>(ddi);
-// 		uint    cellRank = thrust::get<2>(ddi);
-
-// 		// double growProgress=growProgressOld+growSpeed*_dt;
-// 		double growProgress=growProgressOld+0.001*_dt;
-// 		if (cellRank < 2){
-// 			growProgress=0;
-// 		}
-// 		else if (cellRank > 62 && cellRank < 86){
-// 			growProgress=0;
-// 		}
-		
-//        //         if (cellRank==5 || cellRank==6) {
-// 	//	return (growProgressOld);
-// 	//	}
-// 		if (growProgress>1.0) {
-// 		return (1.0);
-//                 }
-// 		else {
-// 		return (growProgress) ; 
-// 		}
-// 	}
-
-
-// };
 
 struct progress_BCImp: thrust::unary_function<DDUi, double> {
 
@@ -3696,24 +2934,6 @@ struct CompuIsDivide: thrust::unary_function<CVec3Int, BoolD> {
 	}
 };
 
-// struct CompuIsDivide_M: thrust::unary_function<DUi, bool> {
-// 	uint _maxIntnlNodePerCell;
-// 	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
-// 	__host__ __device__ CompuIsDivide_M(uint maxIntnlNodePerCell) :
-// 			_maxIntnlNodePerCell(maxIntnlNodePerCell) {
-// 	}
-// 	__host__ __device__
-// 	bool operator()(const DUi &vec) {
-// 		double growthProgress = thrust::get<0>(vec);
-// 		uint nodeCount = thrust::get<1>(vec);
-// 		if (growthProgress >= 1.0 && nodeCount == _maxIntnlNodePerCell) { // if we are extremly ulucky there is a chance that growth progress is > 1 but nodes are not full 
-// 			// and in the growth function there is no mechanism to check and add more nodes.
-// 			return true;
-// 		} else {
-// 			return false;
-// 		}
-// 	}
-// };
 struct CompuIsDivide_M: thrust::unary_function<DUi, bool> {
 	uint _targetCellDividingArea;
 	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
@@ -3733,25 +2953,6 @@ struct CompuIsDivide_M: thrust::unary_function<DUi, bool> {
 	}
 };
 
-//A&A
-// struct CompuIsEnteringMitotic_M: thrust::unary_function<CVec2, bool> {
-// 	double _grthprgCriVal ; 
-// 	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
-// 	__host__ __device__ CompuIsEnteringMitotic_M(double grthprgCriVal_M) :
-// 			_grthprgCriVal(grthprgCriVal_M) {
-// 	}
-// 	__host__ __device__
-// 	bool operator()(const CVec2 &vec) {
-// 		double growthProgress = thrust::get<0>(vec);
-// 		double growthProgressOld = thrust::get<1>(vec);
-		
-// 		if (growthProgress >= _grthprgCriVal &&  growthProgressOld <= _grthprgCriVal) {
-// 			return true;
-// 		} else {
-// 			return false;
-// 		}
-// 	}
-// };
 struct CompuIsEnteringMitotic_M: thrust::unary_function<CVec2, bool> {
 	double _grthprgCriVal ; 
 	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
@@ -3770,27 +2971,6 @@ struct CompuIsEnteringMitotic_M: thrust::unary_function<CVec2, bool> {
 		}
 	}
 };
-
-//AAMIRI
-/*
-struct CompuIsRemoving_M: thrust::unary_function<DUi, bool> {
-	uint _maxIntnlNodePerCell;
-	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
-	__host__ __device__ CompuIsDivide_M(uint maxIntnlNodePerCell) :
-			_maxIntnlNodePerCell(maxIntnlNodePerCell) {
-	}
-	__host__ __device__
-	bool operator()(const DUi &vec) {
-		double growthProgress = thrust::get<0>(vec);
-		uint nodeCount = thrust::get<1>(vec);
-		if ( nodeCount == _maxIntnlNodePerCell - _maxIntnlNodePerCell) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-};
-*/
 
 /**
  * Functor for modify veolcities of all nodes given node type and isActive
@@ -3968,13 +3148,7 @@ struct AddMemNode: public thrust::unary_function<TuuuddII, uint> {
 		int iDBasal=	thrust::get<6>(oriData); 
 		uint globalIndxEnd = cellRank * _maxNodePerCell + curActCount; //membrane nodes are first. End position based on newindex
 		uint globalIndexInsert = cellRank * _maxNodePerCell + insertIndx;
-		// if (insertIndx<=iDApical) {  //since the current acrive membrane nodes is one more, it can not be the last ID.
-		// 	iDApical=iDApical+1 ;
-		// }
 
-		// if (insertIndx<=iDBasal) {
-		// 	iDBasal=iDBasal+1 ;
-		// }
 		for (uint i = globalIndxEnd; i >= globalIndexInsert; i--) {
 			_isActiveAddr[i] = _isActiveAddr[i - 1];
 			_xPosAddr[i] = _xPosAddr[i - 1];
@@ -4148,32 +3322,6 @@ struct BC_Tissue_Damp: public thrust::unary_function<CVec3,CVec2> {
 
 }
 }; 
-
-
-/**struct BC_Tissue_Damp: public thrust::unary_function<CVec2,CVec2> {
-	double _Damp_Coef ; 
-	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
-	__host__ __device__  BC_Tissue_Damp(double InputFunctor1
-			) :
-			 _Damp_Coef(InputFunctor1) {
-	}
-	__host__ __device__ CVec2 operator()(const CVec2 &inputInfo) {
-		double CenterCellX = thrust::get<0>(inputInfo);
-		double CenterCellY = thrust::get<1>(inputInfo);
-         //       double TCenterX= 0.5*(_TMinX+_TMaxX);
-           //     double TCenterY= 0.5*(_TMinY+_TMaxY); 
-             //   double TRadius=0.5*( 0.5*(_TMaxX-_TMinX) +0.5*(_TMaxY-_TMinY)) ; 
-
-               // double Dist=sqrt (
-                 //           (CenterCellX-TCenterX)*(CenterCellX-TCenterX)+
-                   //        (CenterCellY-TCenterY)*(CenterCellY-TCenterY)) ; 
-                //double Damp=_Damp_Coef + max(0.0,Dist/TRadius-0.8)*1.0/(1.0-0.8)*200*_Damp_Coef     ;              
-                        
-			return thrust::make_tuple(CenterCellX,CenterCellY);
-		}
-}; 
-
-**/
 
 
 struct CalPerim: public thrust::unary_function<Tuuudd, double> {
@@ -4979,7 +4127,6 @@ class SceCells {
 	void calCellArea();
     void calCellPerim();//AAMIRI
     void calCellPressure();//AAMIRI
-	// void eCMCellInteraction(bool cellPolar, bool subCellPolar, bool tmpIsInitSetup, double timeRatio, double timeRatio_Crit_ECM, double timeRatio_Crit_Division, int relaxCount) ;
 	void eCMCellInteraction(bool cellPolar, bool subCellPolar, bool tmpIsInitSetup, double timeRatio, double timeRatio_Crit_ECM, double timeRatio_Crit_Division, int relaxCount, double mitoticThreshold) ; 
 public:
 
@@ -4997,11 +4144,9 @@ public:
 
 	CellInfoVecs  &  getCellInfoVecs()   {
 			return cellInfoVecs ; 
-	}; // Ali 
-    //void UpdateTimeStepByAdaptiveMethod(double adaptiveLevelCoef, double minDt, double maxDt, double & dt) ; 
+	}; // Ali  
 	void runAllCellLevelLogicsDisc(double dt);
 
-//Ali	void runAllCellLogicsDisc_M(double dt);
 	void runAllCellLogicsDisc_M(double & dt, double Damp_Coef, double InitTimeStage,
 									 double timeRatio, double timeRatio_Crit_actomyo, double timeRatio_Crit_ECM, double timeRatio_Crit_Division,
 									 	double volume_Increase_Target_Ratio, double volume_Increase_Scale, double postDivision_restorationRateScale, int cycle,

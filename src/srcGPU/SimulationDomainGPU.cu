@@ -123,13 +123,6 @@ void SimulationDomainGPU::runAllLogic(double dt) {
 	}
 }
 
-//Ali void SimulationDomainGPU::runAllLogic_M(double dt) {
-// void SimulationDomainGPU::runAllLogic_M(double & dt, double Damp_Coef, double InitTimeStage, 
-// 											double timeRatio, double timeRatio_Crit_actomyo, double timeRatio_Crit_ECM, double timeRatio_Crit_Division,
-// 												double volume_Increase_Target_Ratio, double volume_Increase_Scale, double postDivision_restorationRateScale, int cycle,
-// 												double distFromNucleus_max, double distFromNucleus_min, double distFromNucleus_normalMax, double distFromNucleus_normalMax_apical, double percentage_before_timeRatio_Crit_Division_scaling,
-// 												double growthProgressSpeed, int maxApicalBasalNodeNum, int minApicalBasalNodeNum, double maxLengthToAddMemNodes) {                          //Ali
-
 void SimulationDomainGPU::runAllLogic_M(double & dt, double Damp_Coef, double InitTimeStage, 
 											double timeRatio, double timeRatio_Crit_actomyo, double timeRatio_Crit_ECM, double timeRatio_Crit_Division,
 												double volume_Increase_Target_Ratio, double volume_Increase_Scale, double postDivision_restorationRateScale, int cycle,
@@ -150,10 +143,7 @@ void SimulationDomainGPU::runAllLogic_M(double & dt, double Damp_Coef, double In
 #endif
 	// cout << "--- 1 ---" << endl;
 	cout.flush();
-	// nodes.sceForcesDisc_M(timeRatio, timeRatio_Crit_Division, cycle); //node velocity is reset here.
-	// nodes.sceForcesDisc_M(timeRatio, timeRatio_Crit_Division, cycle,
-	// 							contractActomyo_multip_perCell1, contractActomyo_multip_perCell2, contractActomyo_multip_perCell3,
-	// 							contractActomyo_multip_perCell_apical1, contractActomyo_multip_perCell_apical2, contractActomyo_multip_perCell_apical3);
+	
 	nodes.sceForcesDisc_M(timeRatio, timeRatio_Crit_Division, cycle,
 								contractActomyo_multip_perCell1, contractActomyo_multip_perCell2, contractActomyo_multip_perCell3,
 								contractActomyo_multip_perCell_apical1, contractActomyo_multip_perCell_apical2, contractActomyo_multip_perCell_apical3,
@@ -167,8 +157,7 @@ void SimulationDomainGPU::runAllLogic_M(double & dt, double Damp_Coef, double In
 #endif
 	// cout << "--- 3 ---" << endl;
 	cout.flush();
-	// cells.runAllCellLogicsDisc_M(dt,Damp_Coef,InitTimeStage, timeRatio, timeRatio_Crit_actomyo, timeRatio_Crit_ECM, timeRatio_Crit_Division, volume_Increase_Target_Ratio, volume_Increase_Scale, postDivision_restorationRateScale, cycle,
-	// 								distFromNucleus_max, distFromNucleus_min, distFromNucleus_normalMax, distFromNucleus_normalMax_apical, percentage_before_timeRatio_Crit_Division_scaling, growthProgressSpeed, maxApicalBasalNodeNum, minApicalBasalNodeNum, maxLengthToAddMemNodes);
+
 	cells.runAllCellLogicsDisc_M(dt,Damp_Coef,InitTimeStage, timeRatio, timeRatio_Crit_actomyo, timeRatio_Crit_ECM, timeRatio_Crit_Division, volume_Increase_Target_Ratio, volume_Increase_Scale, postDivision_restorationRateScale, cycle,
 									distFromNucleus_max, distFromNucleus_min, distFromNucleus_normalMax1, distFromNucleus_normalMax2,distFromNucleus_normalMax3,
 									distFromNucleus_normalMax_apical1,distFromNucleus_normalMax_apical2,distFromNucleus_normalMax_apical3, 
@@ -505,58 +494,4 @@ void SimulationDomainGPU::processT1Info(int maxStepTraceBack,
 	std::vector<PreT1State> preT1States = netInfo.scanForPreT1States();
 	preT1Vec.push_back(preT1States);
 }
-/*
-vector<double>  Solver::solve3Diag(const vector <double> & lDiag, const vector <double> & Diag, const vector <double> & uDiag,
-	                               const vector <double> & rHS) {
-
-   // --- Initialize cuSPARSE
-    cusparseHandle_t handle;    cusparseCreate(&handle);
-
-    const int N     = 5;        // --- Size of the linear system
-
-    // --- Lower diagonal, diagonal and upper diagonal of the system matrix
-    double *h_ld = (double*)malloc(N * sizeof(double));
-    double *h_d  = (double*)malloc(N * sizeof(double));
-    double *h_ud = (double*)malloc(N * sizeof(double));
-
-    h_ld[0]     = 0.;
-    h_ud[N-1]   = 0.;
-    for (int k = 0; k < N - 1; k++) {
-        h_ld[k + 1] = -1.;
-        h_ud[k]     = -1.;
-    }
-    for (int k = 0; k < N; k++) h_d[k] = 2.;
-
-    double *d_ld;   cudaMalloc(&d_ld, N * sizeof(double));
-    double *d_d;    cudaMalloc(&d_d,  N * sizeof(double));
-    double *d_ud;   cudaMalloc(&d_ud, N * sizeof(double));
-
-    cudaMemcpy(d_ld, h_ld, N * sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_d,  h_d,  N * sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_ud, h_ud, N * sizeof(double), cudaMemcpyHostToDevice);
-
-    // --- Allocating and defining dense host and device data vectors
-    double *h_x = (double *)malloc(N * sizeof(double)); 
-    h_x[0] = 100.0;  h_x[1] = 200.0; h_x[2] = 400.0; h_x[3] = 500.0; h_x[4] = 300.0;
-
-    double *d_x;       cudaMalloc(&d_x, N * sizeof(double));   
-    cudaMemcpy(d_x, h_x, N * sizeof(double), cudaMemcpyHostToDevice);
-
-    // --- Allocating the host and device side result vector
-    double *h_y = (double *)malloc(N * sizeof(double)); 
-    double *d_y;        cudaMalloc(&d_y, N * sizeof(double)); 
-
-    cusparseDgtsv(handle, N, 1, d_ld, d_d, d_ud, d_x, N);
-
-    cudaMemcpy(h_x, d_x, N * sizeof(double), cudaMemcpyDeviceToHost);
-    for (int k=0; k<N; k++) printf("%f\n", h_x[k]);
-	vector < double> ans ; 
-	for (int k=0; k<N; k++) {
-	   ans.push_back(h_x[k]); 
-
-	}
-	return ans ; 
-
-}
-*/
 
