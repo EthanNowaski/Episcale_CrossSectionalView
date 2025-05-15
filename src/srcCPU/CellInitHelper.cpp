@@ -444,57 +444,7 @@ vector<CVector> CellInitHelper::rotate2D(vector<CVector> &initECMNodePoss,
 	}
 	return result;
 }
-/* CGAL Deactivation
-RawDataInput CellInitHelper::generateRawInput_stab() {
-	RawDataInput rawData;
-	rawData.simuType = simuType;
-	vector<CVector> insideCellCenters;
-	vector<CVector> outsideBdryNodePos;
-	std::string bdryInputFileName = globalConfigVars.getConfigValue(
-			"Bdry_InputFileName").toString();
 
-	GEOMETRY::MeshGen meshGen;
-
-	GEOMETRY::UnstructMesh2D mesh = meshGen.generateMesh2DFromFile(
-			bdryInputFileName);
-
-	std::vector<GEOMETRY::Point2D> insideCenterPoints =
-			mesh.getAllInsidePoints();
-
-	double fine_Ratio =
-			globalConfigVars.getConfigValue("StabBdrySpacingRatio").toDouble();
-
-	for (uint i = 0; i < insideCenterPoints.size(); i++) {
-		insideCellCenters.push_back(
-				CVector(insideCenterPoints[i].getX(),
-						insideCenterPoints[i].getY(), 0));
-	}
-
-	mesh = meshGen.generateMesh2DFromFile(bdryInputFileName, fine_Ratio);
-
-	std::vector<GEOMETRY::Point2D> bdryPoints = mesh.getOrderedBdryPts();
-
-	for (uint i = 0; i < bdryPoints.size(); i++) {
-		outsideBdryNodePos.push_back(
-				CVector(bdryPoints[i].getX(), bdryPoints[i].getY(), 0));
-	}
-
-	for (unsigned int i = 0; i < insideCellCenters.size(); i++) {
-		CVector centerPos = insideCellCenters[i];
-		rawData.MXCellCenters.push_back(centerPos);
-		centerPos.Print();
-	}
-
-	for (uint i = 0; i < outsideBdryNodePos.size(); i++) {
-		rawData.bdryNodes.push_back(outsideBdryNodePos[i]);
-	}
-
-	generateCellInitNodeInfo_v2(rawData.initCellNodePoss);
-
-	rawData.isStab = true;
-	return rawData;
-}
-*/
 RawDataInput_M CellInitHelper::generateRawInput_M() {   // an Important function in cell inithelper
 	RawDataInput_M rawData;
 
@@ -1027,17 +977,6 @@ vector<CVector> CellInitHelper::generateInitIntnlNodes(CVector& center,
 			isSuccess = true;
 		}
 	}
-	/*
-	 // also need to make sure center point is (0,0,0).
-	 CVector tmpSum(0, 0, 0);
-	 for (uint i = 0; i < attemptedPoss.size(); i++) {
-	 tmpSum = tmpSum + attemptedPoss[i];
-	 }
-	 tmpSum = tmpSum / (double) (attemptedPoss.size());
-	 for (uint i = 0; i < attemptedPoss.size(); i++) {
-	 attemptedPoss[i] = attemptedPoss[i] - tmpSum;
-	 }
-	 */
 
 	 // Input for nuclear pattern
 double initRadius =
@@ -1227,37 +1166,13 @@ bool CellInitHelper::isMXType(CVector position) {
 	return true;
 }
 
-/* beak simulation is not active and I want to remove dependency of the code on CGAL
-void CellInitHelper::initInternalBdry() {
-	GEOMETRY::MeshGen meshGen;
-	GEOMETRY::MeshInput input = meshGen.obtainMeshInput();
-	internalBdryPts = input.internalBdryPts;
-}
-*/
-/* This function is used for DiskMain project which is not active and I want to remove the dependency of the code on CGAL
-SimulationInitData_V2 CellInitHelper::initStabInput() {
-	RawDataInput rawInput = generateRawInput_stab();
-	SimulationInitData_V2 initData = initInputsV3(rawInput);
-	initData.isStab = true;
-	return initData;
-}
-*/
-//RawDataInput rawInput = generateRawInput_stab();
 SimulationInitData_V2_M CellInitHelper::initInput_M() {   //Ali: This function is called by the main function of the code which is discMain_M.cpp
 	RawDataInput_M rawInput_m = generateRawInput_M();     //Ali: This function includes reading cell centers and membrane nodes locations
 	SimulationInitData_V2_M initData = initInputsV3_M(rawInput_m); // This function reformat the files read in the input to be easily movable to GPU
 	initData.isStab = false;
 	return initData;
 }
-/* this function is needed for laserAblation and discMain. cpp which none of them are acitve and I want to remove dependency on CGAL
-SimulationInitData_V2 CellInitHelper::initSimuInput(
-		std::vector<CVector> &cellCenterPoss) {
-	RawDataInput rawInput = generateRawInput_simu(cellCenterPoss);  //This function call MeshGen which is heavily using CGAL
-	SimulationInitData_V2 simuInitData = initInputsV3(rawInput);
-	simuInitData.isStab = false;
-	return simuInitData;
-}
-*/
+
 void SimulationGlobalParameter::initFromConfig() {
 	int type = globalConfigVars.getConfigValue("SimulationType").toInt();
 	SimulationType simuType = parseTypeFromConfig(type);
@@ -1534,35 +1449,3 @@ vector<vector<CVector> > CellInitHelper::readMembNodes_multip_integrin(int numCe
 	return initMembrMultip ;  
 }
 
-
-/* CGAL DEACTIVATION
-RawDataInput CellInitHelper::generateRawInput_singleCell() {
-	RawDataInput rawData;
-	rawData.simuType = simuType;
-
-	std::string initPosFileName = globalConfigVars.getConfigValue(
-			"SingleCellCenterPos").toString();
-
-	fstream fs(initPosFileName.c_str());
-	vector<CVector> insideCellCenters = GEOMETRY::MeshInputReader::readPointVec(
-			fs);
-	fs.close();
-
-	for (unsigned int i = 0; i < insideCellCenters.size(); i++) {
-		CVector centerPos = insideCellCenters[i];
-		rawData.MXCellCenters.push_back(centerPos);
-	}
-
-	generateCellInitNodeInfo_v2(rawData.initCellNodePoss);
-	rawData.isStab = true;
-	return rawData;
-}
-*/
-/* CGAL deactivation
-SimulationInitData_V2 CellInitHelper::initSingleCellTest() {
-	RawDataInput rawInput = generateRawInput_singleCell();
-	SimulationInitData_V2 initData = initInputsV3(rawInput);
-	initData.isStab = true;
-	return initData;
-}
-*/
