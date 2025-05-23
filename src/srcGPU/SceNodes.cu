@@ -1254,19 +1254,19 @@ void SceNodes::buildBuckets2D() {
 // return tuple of keys and values
 // transform the points to their bucket indices
 	thrust::transform(
-			make_zip_iterator(
-					make_tuple(infoVecs.nodeLocX.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(infoVecs.nodeLocX.begin(),
 							infoVecs.nodeLocY.begin(),
 							infoVecs.nodeLocZ.begin(),
 							infoVecs.nodeIsActive.begin(), countingIterBegin)),
-			make_zip_iterator(
-					make_tuple(infoVecs.nodeLocX.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(infoVecs.nodeLocX.begin(),
 							infoVecs.nodeLocY.begin(),
 							infoVecs.nodeLocZ.begin(),
 							infoVecs.nodeIsActive.begin(), countingIterBegin))
 					+ totalActiveNodes,
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeys.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeys.begin(),
 							auxVecs.bucketValues.begin())),
 			pointToBucketIndex2D(domainPara.minX, domainPara.maxX,
 					domainPara.minY, domainPara.maxY, domainPara.gridSpacing));
@@ -1295,19 +1295,19 @@ void SceNodes::buildBuckets2D_M() {
 	// return tuple of keys and values
 	// transform the points to their bucket indices
 	thrust::transform(
-			make_zip_iterator(
-					make_tuple(infoVecs.nodeLocX.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(infoVecs.nodeLocX.begin(),
 							infoVecs.nodeLocY.begin(),
 							infoVecs.nodeLocZ.begin(),
 							infoVecs.nodeIsActive.begin(), iBegin)),
-			make_zip_iterator(
-					make_tuple(infoVecs.nodeLocX.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(infoVecs.nodeLocX.begin(),
 							infoVecs.nodeLocY.begin(),
 							infoVecs.nodeLocZ.begin(),
 							infoVecs.nodeIsActive.begin(), iBegin))
 					+ totalActiveNodes,
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeys.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeys.begin(),
 							auxVecs.bucketValues.begin())),
 			pointToBucketIndex2D(domainPara.minX, domainPara.maxX,
 					domainPara.minY, domainPara.maxY, domainPara.gridSpacing));
@@ -1334,19 +1334,19 @@ void SceNodes::buildBuckets3D() {
 	// return tuple of keys and values
 	// transform the points to their bucket indices
 	thrust::transform(
-			make_zip_iterator(
-					make_tuple(infoVecs.nodeLocX.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(infoVecs.nodeLocX.begin(),
 							infoVecs.nodeLocY.begin(),
 							infoVecs.nodeLocZ.begin(),
 							infoVecs.nodeIsActive.begin(), iBegin)),
-			make_zip_iterator(
-					make_tuple(infoVecs.nodeLocX.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(infoVecs.nodeLocX.begin(),
 							infoVecs.nodeLocY.begin(),
 							infoVecs.nodeLocZ.begin(),
 							infoVecs.nodeIsActive.begin(), iBegin))
 					+ totalActiveNodes,
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeys.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeys.begin(),
 							auxVecs.bucketValues.begin())),
 			BucketIndexer3D(domainPara.minX, domainPara.maxX, domainPara.minY,
 					domainPara.maxY, domainPara.minZ, domainPara.maxZ,
@@ -2110,11 +2110,11 @@ void SceNodes::extendBuckets2D() {
 	thrust::constant_iterator<uint> last = first + valuesCount;
 
 	expand(first, last,
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeys.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeys.begin(),
 							auxVecs.bucketValues.begin())),
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeysExpanded.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeysExpanded.begin(),
 							auxVecs.bucketValuesIncludingNeighbor.begin())));
 
 	thrust::counting_iterator<uint> countingBegin(0);
@@ -2122,13 +2122,13 @@ void SceNodes::extendBuckets2D() {
 			+ valuesCount * extensionFactor2D;
 
 	thrust::transform(
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeysExpanded.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeysExpanded.begin(),
 							countingBegin)),
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeysExpanded.end(), countingEnd)),
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeysExpanded.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeysExpanded.end(), countingEnd)),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeysExpanded.begin(),
 							countingBegin)),
 			NeighborFunctor2D(domainPara.XBucketSize, domainPara.YBucketSize));
 
@@ -2163,24 +2163,24 @@ void SceNodes::extendBuckets2D_M() {
 	thrust::constant_iterator<uint> last = first + endIndx_M;
 
 	expand(first, last,
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeys.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeys.begin(),
 							auxVecs.bucketValues.begin())),
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeysExpanded.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeysExpanded.begin(),
 							auxVecs.bucketValuesIncludingNeighbor.begin())));
 
 	thrust::counting_iterator<uint> countingBegin(0);
 
 	thrust::transform(
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeysExpanded.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeysExpanded.begin(),
 							countingBegin)),
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeysExpanded.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeysExpanded.begin(),
 							countingBegin)) + endIndxExt_M,
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeysExpanded.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeysExpanded.begin(),
 							countingBegin)),
 			NeighborFunctor2D(domainPara.XBucketSize, domainPara.YBucketSize));
 
@@ -2208,24 +2208,24 @@ void SceNodes::extendBuckets3D() {
 	thrust::constant_iterator<uint> last = first + endIndx_M; // this is NOT numerical addition!
 
 	expand(first, last,
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeys.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeys.begin(),
 							auxVecs.bucketValues.begin())),
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeysExpanded.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeysExpanded.begin(),
 							auxVecs.bucketValuesIncludingNeighbor.begin())));
 
 	thrust::counting_iterator<uint> countingBegin(0);
 
 	thrust::transform(
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeysExpanded.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeysExpanded.begin(),
 							countingBegin)),
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeysExpanded.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeysExpanded.begin(),
 							countingBegin)) + endIndxExt_M,
-			make_zip_iterator(
-					make_tuple(auxVecs.bucketKeysExpanded.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(auxVecs.bucketKeysExpanded.begin(),
 							countingBegin)),
 			NgbrFunc3D(domainPara.XBucketSize, domainPara.YBucketSize,
 					domainPara.ZBucketSize));
@@ -2247,39 +2247,39 @@ void SceNodes::applySceForcesBasic() {
 	double* nodeLocZAddress = thrust::raw_pointer_cast(&infoVecs.nodeLocZ[0]);
 
 	thrust::transform(
-			make_zip_iterator(
-					make_tuple(
-							make_permutation_iterator(auxVecs.keyBegin.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(
+							thrust::make_permutation_iterator(auxVecs.keyBegin.begin(),
 									auxVecs.bucketKeys.begin()),
-							make_permutation_iterator(auxVecs.keyEnd.begin(),
+							thrust::make_permutation_iterator(auxVecs.keyEnd.begin(),
 									auxVecs.bucketKeys.begin()),
 							auxVecs.bucketValues.begin(),
-							make_permutation_iterator(infoVecs.nodeLocX.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocX.begin(),
 									auxVecs.bucketValues.begin()),
-							make_permutation_iterator(infoVecs.nodeLocY.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocY.begin(),
 									auxVecs.bucketValues.begin()),
-							make_permutation_iterator(infoVecs.nodeLocZ.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocZ.begin(),
 									auxVecs.bucketValues.begin()))),
-			make_zip_iterator(
-					make_tuple(
-							make_permutation_iterator(auxVecs.keyBegin.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(
+							thrust::make_permutation_iterator(auxVecs.keyBegin.begin(),
 									auxVecs.bucketKeys.end()),
-							make_permutation_iterator(auxVecs.keyEnd.begin(),
+							thrust::make_permutation_iterator(auxVecs.keyEnd.begin(),
 									auxVecs.bucketKeys.end()),
 							auxVecs.bucketValues.end(),
-							make_permutation_iterator(infoVecs.nodeLocX.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocX.begin(),
 									auxVecs.bucketValues.end()),
-							make_permutation_iterator(infoVecs.nodeLocY.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocY.begin(),
 									auxVecs.bucketValues.end()),
-							make_permutation_iterator(infoVecs.nodeLocZ.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocZ.begin(),
 									auxVecs.bucketValues.end()))),
-			make_zip_iterator(
-					make_tuple(
-							make_permutation_iterator(infoVecs.nodeVelX.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(
+							thrust::make_permutation_iterator(infoVecs.nodeVelX.begin(),
 									auxVecs.bucketValues.begin()),
-							make_permutation_iterator(infoVecs.nodeVelY.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeVelY.begin(),
 									auxVecs.bucketValues.begin()),
-							make_permutation_iterator(infoVecs.nodeVelZ.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeVelZ.begin(),
 									auxVecs.bucketValues.begin()))),
 			AddSceForceBasic(valueAddress, nodeLocXAddress, nodeLocYAddress,
 					nodeLocZAddress));
@@ -2295,47 +2295,47 @@ void SceNodes::applySceForcesDisc() {
 			&infoVecs.nodeGrowPro[0]);
 
 	thrust::transform(
-			make_zip_iterator(
-					make_tuple(
-							make_permutation_iterator(auxVecs.keyBegin.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(
+							thrust::make_permutation_iterator(auxVecs.keyBegin.begin(),
 									auxVecs.bucketKeys.begin()),
-							make_permutation_iterator(auxVecs.keyEnd.begin(),
+							thrust::make_permutation_iterator(auxVecs.keyEnd.begin(),
 									auxVecs.bucketKeys.begin()),
 							auxVecs.bucketValues.begin(),
-							make_permutation_iterator(infoVecs.nodeLocX.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocX.begin(),
 									auxVecs.bucketValues.begin()),
-							make_permutation_iterator(infoVecs.nodeLocY.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocY.begin(),
 									auxVecs.bucketValues.begin()),
-							make_permutation_iterator(infoVecs.nodeLocZ.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocZ.begin(),
 									auxVecs.bucketValues.begin()))),
-			make_zip_iterator(
-					make_tuple(
-							make_permutation_iterator(auxVecs.keyBegin.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(
+							thrust::make_permutation_iterator(auxVecs.keyBegin.begin(),
 									auxVecs.bucketKeys.end()),
-							make_permutation_iterator(auxVecs.keyEnd.begin(),
+							thrust::make_permutation_iterator(auxVecs.keyEnd.begin(),
 									auxVecs.bucketKeys.end()),
 							auxVecs.bucketValues.end(),
-							make_permutation_iterator(infoVecs.nodeLocX.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocX.begin(),
 									auxVecs.bucketValues.end()),
-							make_permutation_iterator(infoVecs.nodeLocY.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocY.begin(),
 									auxVecs.bucketValues.end()),
-							make_permutation_iterator(infoVecs.nodeLocZ.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocZ.begin(),
 									auxVecs.bucketValues.end()))),
-			make_zip_iterator(
-					make_tuple(
-							make_permutation_iterator(infoVecs.nodeVelX.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(
+							thrust::make_permutation_iterator(infoVecs.nodeVelX.begin(),
 									auxVecs.bucketValues.begin()),
-							make_permutation_iterator(infoVecs.nodeVelY.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeVelY.begin(),
 									auxVecs.bucketValues.begin()),
-							make_permutation_iterator(infoVecs.nodeVelZ.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeVelZ.begin(),
 									auxVecs.bucketValues.begin()),
-							make_permutation_iterator(
+							thrust::make_permutation_iterator(
 									infoVecs.nodeInterForceX.begin(),
 									auxVecs.bucketValues.begin()),
-							make_permutation_iterator(
+							thrust::make_permutation_iterator(
 									infoVecs.nodeInterForceY.begin(),
 									auxVecs.bucketValues.begin()),
-							make_permutation_iterator(
+							thrust::make_permutation_iterator(
 									infoVecs.nodeInterForceZ.begin(),
 									auxVecs.bucketValues.begin()))),
 			AddSceForceDisc(valueAddress, nodeLocXAddress, nodeLocYAddress,
@@ -2778,33 +2778,33 @@ void SceNodes::applySceForcesDisc_M(double mitoticThreshold) {
 			&infoVecs.quiescencePerNode[0]);
 	
 	thrust::transform(
-			make_zip_iterator(
-					make_tuple(
-							make_permutation_iterator(auxVecs.keyBegin.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(
+							thrust::make_permutation_iterator(auxVecs.keyBegin.begin(),
 									auxVecs.bucketKeys.begin()),
-							make_permutation_iterator(auxVecs.keyEnd.begin(),
+							thrust::make_permutation_iterator(auxVecs.keyEnd.begin(),
 									auxVecs.bucketKeys.begin()),
 							auxVecs.bucketValues.begin(),
-							make_permutation_iterator(infoVecs.nodeLocX.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocX.begin(),
 									auxVecs.bucketValues.begin()),
-							make_permutation_iterator(infoVecs.nodeLocY.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocY.begin(),
 									auxVecs.bucketValues.begin()))),
-			make_zip_iterator(
-					make_tuple(
-							make_permutation_iterator(auxVecs.keyBegin.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(
+							thrust::make_permutation_iterator(auxVecs.keyBegin.begin(),
 									auxVecs.bucketKeys.begin() + endIndx_M),
-							make_permutation_iterator(auxVecs.keyEnd.begin(),
+							thrust::make_permutation_iterator(auxVecs.keyEnd.begin(),
 									auxVecs.bucketKeys.begin() + endIndx_M),
 							auxVecs.bucketValues.end(),
-							make_permutation_iterator(infoVecs.nodeLocX.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocX.begin(),
 									auxVecs.bucketValues.begin() + endIndx_M),
-							make_permutation_iterator(infoVecs.nodeLocY.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeLocY.begin(),
 									auxVecs.bucketValues.begin() + endIndx_M))),
-			make_zip_iterator(
-					make_tuple(
-							make_permutation_iterator(infoVecs.nodeVelX.begin(),
+			thrust::make_zip_iterator(
+					thrust::make_tuple(
+							thrust::make_permutation_iterator(infoVecs.nodeVelX.begin(),
 									auxVecs.bucketValues.begin()),
-							make_permutation_iterator(infoVecs.nodeVelY.begin(),
+							thrust::make_permutation_iterator(infoVecs.nodeVelY.begin(),
 									auxVecs.bucketValues.begin()))),
 			AddForceDisc_M(valueAddress, nodeLocXAddress, nodeLocYAddress,
 					nodeAdhIdxAddress, membrIntnlAddress,
