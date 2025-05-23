@@ -1,19 +1,28 @@
 cmake_minimum_required (VERSION 2.8.7)
 set(PROJECT_NAME_STR SceCellsGPU)
-#project(${PROJECT_NAME_STR} C CXX CUDA)
-project(${PROJECT_NAME_STR})
+project(${PROJECT_NAME_STR} CXX CUDA)
+#project(${PROJECT_NAME_STR})
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 
 find_package(CUDA REQUIRED)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-        add_definitions(-Wall -ansi -Wno-deprecated -fpermissive -frounding-math)
+        #add_definitions(-Wall -ansi -Wno-deprecated -fpermissive -frounding-math)
+        add_definitions(-Wall -Wno-deprecated -fpermissive -frounding-math)
 endif()
 
 # After some performance testing, there is no significant performance difference
 # between compute_20 and compute_30. 
 # Therefore, for compatibility reason, compute 3.0 is used.
 # set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -DTHRUST_DEBUG -gencode arch=compute_20,code=sm_20)
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -gencode arch=compute_30,code=compute_30)
+#set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -gencode arch=compute_70,code=compute_70)
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; "--extended-lambda")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -std=c++11")
 
 MESSAGE("NVCC flags are : " ${CUDA_NVCC_FLAGS})
 
@@ -46,7 +55,7 @@ SET(CMAKE_PERFTEST_DIR ${CMAKE_SOURCE_DIR}/tst/perfTest)
 #SET(CMAKE_MODELTEST_DIR ${CMAKE_SOURCE_DIR}/modelTest)
 SET(GOOGLETEST_DIR ${CMAKE_SOURCE_DIR}/tst/googletest)
 
-# make VERBOSE =1
+#make VERBOSE =1
 
 find_path(STDIO_INCLUDE_PATH stdio.h)
 # later version c++ seems to be incompatible with the CUDA version we are using.
