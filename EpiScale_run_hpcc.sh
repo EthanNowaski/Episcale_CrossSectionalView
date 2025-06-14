@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:a100:1
 #SBATCH --ntasks=1
 #SBATCH --mem=90G
 #SBATCH --output=compileTest# This affects the print out of the "std::cout" in the script, make sure this is changed for different jobs.
