@@ -3,7 +3,7 @@ DOI: https://zenodo.org/badge/latestdoi/468540858
 CUDA code for developmental biology using Subcellular Element Method
 
 Hardware requirement: 
-Nvidia video card that supports SM 2.0+ and CUDA 4.0 
+Nvidia video card that supports SM 2.0+ and CUDA 11.0 
 
 Software environment requirement: 
 CMAKE ----- Build system.
