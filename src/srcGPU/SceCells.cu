@@ -780,6 +780,9 @@ void SceCells::initCellInfoVecs() {
 }
 
 void SceCells::initCellInfoVecs_M() {
+	//ChangesMadeByKT_begin
+	cellInfoVecs.cellSubdomainIndx.resize(allocPara_m.maxCellCount, -1);
+	 //ChangesMadeByKT_end
 	cellInfoVecs.daughterCellProduced.resize(allocPara_m.maxCellCount, 0);
 	cellInfoVecs.distFromNucleus_normal.resize(allocPara_m.maxCellCount,0.0);
 	cellInfoVecs.distFromNucleus_normal_apical.resize(allocPara_m.maxCellCount,0.0);
@@ -2694,7 +2697,25 @@ growthProgressReinitialize.push_back(   -9999.9);//Cell62
 		// isCellGrowSet=true ;
 	// }
 	// std::cout << "     *** 16 ***" << endl;
-
+ 
+	//ChangesMadeByKT_begin
+	//Here I am setting the initial columnar cells into three section. In this way the tissue is composed of a medial domain and 2 lateral domains.
+	//The current setup is that 0: anterior, 1: medial, 2: posterior such that 0 and 2 are the 2 lateral domains.
+	//For simplicify, we will assume that any daughter cell will inherit the same "subdomain" belonging as mother cell's assignment.
+	if (relaxCount == 0){
+		for (int i = 0; i < allocPara_m.currentActiveCellCount; i++){
+			if (i > 1 && i < 21){
+				cellInfoVecs.cellSubdomainIndx[i] = 0;
+			}
+			else if (i >= 21 && i < 42){
+				cellInfoVecs.cellSubdomainIndx[i] = 1;
+			}
+			else if (i >= 42 && i < 63){
+				cellInfoVecs.cellSubdomainIndx[i] = 2;
+			}
+		}
+	}
+	//ChangesMadeByKT_end
 
     relaxCount=relaxCount+1 ; 
 	// std::cout << "     *** 17 ***" << endl;
@@ -3995,15 +4016,32 @@ void SceCells::copyFirstCellArr_M(double quiescence1, double quiescence1_half) {
 		// if (cellRank == 31 || cellRank == 86){
 		// 	std::cout<<"CellRank = "<<cellRank<<"activeMembrNodeCounts = "<<cellInfoVecs.activeMembrNodeCounts[cellRank]<<std::endl;
 		// }
-		double leftOrRight = cellInfoVecs.centerCoordX[31]*cellInfoVecs.centerCoordY[cellRank] - cellInfoVecs.centerCoordY[31]*cellInfoVecs.centerCoordX[cellRank];
-		if (leftOrRight >= 0){
-			cellInfoVecs.growthProgress[cellRank] = quiescence1_half; //quiescence1*0.5;
-			std::cout<<"leftOrRight : "<<leftOrRight<<", quiescence : "<<cellInfoVecs.growthProgress[cellRank]<<std::endl;
-		}
-		else{
+
+		//ChangesMadeByKT_begin
+		//Instead of checking for the cross product, let's make a simplifying assumption that a cell carries its own property (if it is a mother cell), and
+		//inherit mother cell's property if it is a daughter cell. A caveat however is that if they later need a dynamic proliferation rate or sort, this needs
+		//to be further modified.
+		if (cellInfoVecs.cellSubdomainIndx[cellRank] == 0){
 			cellInfoVecs.growthProgress[cellRank] = quiescence1;
-			std::cout<<"leftOrRight : "<<leftOrRight<<", quiescence : "<<cellInfoVecs.growthProgress[cellRank]<<std::endl;
 		}
+		else if (cellInfoVecs.cellSubdomainIndx[cellRank] == 1){
+			cellInfoVecs.growthProgress[cellRank] = quiescence1_half;
+		}
+		else if (cellInfoVecs.cellSubdomainIndx[cellRank] == 2){
+			cellInfoVecs.growthProgress[cellRank] = quiescence1;
+		}
+		 //ChangesMadeByKT_end
+
+		// double leftOrRight = cellInfoVecs.centerCoordX[31]*cellInfoVecs.centerCoordY[cellRank] - cellInfoVecs.centerCoordY[31]*cellInfoVecs.centerCoordX[cellRank];
+		// if (leftOrRight >= 0){
+		// 	cellInfoVecs.growthProgress[cellRank] = quiescence1_half; //quiescence1*0.5;
+		// 	std::cout<<"leftOrRight : "<<leftOrRight<<", quiescence : "<<cellInfoVecs.growthProgress[cellRank]<<std::endl;
+		// }
+		// else{
+		// 	cellInfoVecs.growthProgress[cellRank] = quiescence1;
+		// 	std::cout<<"leftOrRight : "<<leftOrRight<<", quiescence : "<<cellInfoVecs.growthProgress[cellRank]<<std::endl;
+		// }
+
 		for (int i = cellRank*allocPara_m.maxAllNodePerCell; i < (cellRank+1)*allocPara_m.maxAllNodePerCell; i++){
 			nodes->getInfoVecs().quiescencePerNode[i] = cellInfoVecs.growthProgress[cellRank];
 		}
@@ -4141,19 +4179,36 @@ void SceCells::copySecondCellArr_M(double quiescence2, double quiescence2_half) 
 		// if (cellRank == 31 || cellRank == 86){
 		// 	std::cout<<"CellRank = "<<cellRank<<"activeMembrNodeCounts = "<<cellInfoVecs.activeMembrNodeCounts[cellRank]<<std::endl;;
 		// }
-		double leftOrRight = cellInfoVecs.centerCoordX[31]*cellInfoVecs.centerCoordY[cellRankMother] - cellInfoVecs.centerCoordY[31]*cellInfoVecs.centerCoordX[cellRankMother];
-		if (leftOrRight >= 0){
-			cellInfoVecs.growthProgress[cellRank] = quiescence2_half;//quiescence2*0.5;
-			std::cout<<"leftOrRight : "<<leftOrRight<<", quiescence : "<<cellInfoVecs.growthProgress[cellRank]<<std::endl;
-		}
-		else{
+
+		//ChangesMadeByKT_begin
+		if (cellInfoVecs.cellSubdomainIndx[cellRankMother] == 0){
 			cellInfoVecs.growthProgress[cellRank] = quiescence2;
-			std::cout<<"leftOrRight : "<<leftOrRight<<", quiescence : "<<cellInfoVecs.growthProgress[cellRank]<<std::endl;
 		}
+		else if (cellInfoVecs.cellSubdomainIndx[cellRankMother] == 1){
+			cellInfoVecs.growthProgress[cellRank] = quiescence2_half;
+		}
+		else if (cellInfoVecs.cellSubdomainIndx[cellRankMother] == 2){
+			cellInfoVecs.growthProgress[cellRank] = quiescence2;
+		}
+		 //ChangesMadeByKT_end
+
+		// double leftOrRight = cellInfoVecs.centerCoordX[31]*cellInfoVecs.centerCoordY[cellRankMother] - cellInfoVecs.centerCoordY[31]*cellInfoVecs.centerCoordX[cellRankMother];
+		// if (leftOrRight >= 0){
+		// 	cellInfoVecs.growthProgress[cellRank] = quiescence2_half;//quiescence2*0.5;
+		// 	std::cout<<"leftOrRight : "<<leftOrRight<<", quiescence : "<<cellInfoVecs.growthProgress[cellRank]<<std::endl;
+		// }
+		// else{
+		// 	cellInfoVecs.growthProgress[cellRank] = quiescence2;
+		// 	std::cout<<"leftOrRight : "<<leftOrRight<<", quiescence : "<<cellInfoVecs.growthProgress[cellRank]<<std::endl;
+		// }
 		// cellInfoVecs.growthProgress[cellRank] = quiescence2;
 		for (int i = cellRank*allocPara_m.maxAllNodePerCell; i < (cellRank+1)*allocPara_m.maxAllNodePerCell; i++){
 			nodes->getInfoVecs().quiescencePerNode[i] = cellInfoVecs.growthProgress[cellRank];
 		}
+
+		//ChangesMadeByJRA_begin
+		cellInfoVecs.cellSubdomainIndx[cellRank] = cellInfoVecs.cellSubdomainIndx[cellRankMother]; //daughter cell gets assidned same subdomain as mother cell
+		//ChangesMadeByJRA_end
 		cellInfoVecs.membrGrowProgress[cellRank] = 0;
 		cellInfoVecs.cellAreaGrowthProgress[cellRank] = 0;
 		cellInfoVecs.cellAreaGrowthProgressNonMitotic[cellRank] = 0;
@@ -4408,7 +4463,6 @@ void SceCells::applyMemForce_M(bool cellPolar,bool subCellPolar) {
                                        cellInfoVecs.centerCoordY.begin()+allocPara_m.currentActiveCellCount ) ;
         double minY_Cell= *MinY_Itr_Cell ; //This variable doesn't seemed to be used even when passed into functions //Kevin
         double maxY_Cell= *MaxY_Itr_Cell ; //This variable doesn't seemed to be used even when passed into functions //Kevin
-
 		
 
 	double* nodeLocXAddr = thrust::raw_pointer_cast(
@@ -5930,7 +5984,11 @@ void SceCells::divide2D_M(double volume_Increase_Target_Ratio, double timeRatio,
 	thrust::default_random_engine rng(seed);
 	rng.discard(allocPara_m.currentActiveCellCount);
 		thrust::uniform_real_distribution<double> distribution(0.0, 1.0);
-		thrust::uniform_real_distribution<double> distribution_half(0.0, 0.5);
+		thrust::uniform_real_distribution<double> distribution_half(0.0, 1.0);
+		//ChangesMadeByJRA_begin
+		thrust::uniform_real_distribution<double> new_cell_rate(0.0, 1.0);  //newly introduced in case we change the distribution above it doesn't affect the rate of new cell introduction
+		//ChangesMadeByJRA_end
+
 		// thrust::uniform_real_distribution<double> distribution_half(0.0, 0.25);
 	
 	// if (timeRatio >= 0.5){
@@ -5950,15 +6008,17 @@ void SceCells::divide2D_M(double volume_Increase_Target_Ratio, double timeRatio,
 		}
 	}
 
-	isNewCellIntroduced = distribution(rng);//(distribution(rng) - 1.0)/2.0;
+//ChangesMadeByJRA_begin
+	isNewCellIntroduced = new_cell_rate(rng);//distribution(rng);//(distribution(rng) - 1.0)/2.0;
+	//ChangesMadeByJRA_begin
 	// if (1 > 0){
 	if (isNewCellIntroduced < thresholdToIntroduceNewCell){
 		quiescence1 = -1.0*distribution(rng);
-		// quiescence1_half = -1.0*distribution_half(rng);
-		quiescence1_half = 1.0*distribution_half(rng);
+		quiescence1_half = -1.0*distribution_half(rng);
+		//quiescence1_half = 1.0*distribution_half(rng);
 		quiescence2 = -1.0*distribution(rng);
-		// quiescence2_half = -1.0*distribution_half(rng);
-		quiescence2_half = 1.0*distribution_half(rng);
+		quiescence2_half = -1.0*distribution_half(rng);
+		//quiescence2_half = 1.0*distribution_half(rng);
 	
 			// std::cout<<"cellArea[10] = "<<cellInfoVecs.cellAreaVec[10]<<std::endl;
 			// std::cout<<"cellArea[19] = "<<cellInfoVecs.cellAreaVec[19]<<std::endl;
@@ -6051,19 +6111,32 @@ void SceCells::divide2D_M(double volume_Increase_Target_Ratio, double timeRatio,
 	}
 	else{
 		double quiescence3 = -1.0*distribution(rng);
-		// double quiescence3_half = -1.0*distribution_half(rng);
-		double quiescence3_half = 1.0*distribution_half(rng);
+		double quiescence3_half = -1.0*distribution_half(rng);
+		//double quiescence3_half = 1.0*distribution_half(rng);
 		copyCellsEnterDivision();
 		uint cellRank = divAuxData.tmpCellRank_M[0];
-		double leftOrRight = cellInfoVecs.centerCoordX[31]*cellInfoVecs.centerCoordY[cellRank] - cellInfoVecs.centerCoordY[31]*cellInfoVecs.centerCoordX[cellRank];
-		if (leftOrRight >= 0){
-			cellInfoVecs.growthProgress[cellRank] = quiescence3_half;//quiescence3*0.5;
-			std::cout<<"leftOrRight : "<<leftOrRight<<", quiescence : "<<cellInfoVecs.growthProgress[cellRank]<<std::endl;
-		}
-		else{
+		
+		//ChangesMadeByKT_begin
+		if (cellInfoVecs.cellSubdomainIndx[cellRank] == 0){
 			cellInfoVecs.growthProgress[cellRank] = quiescence3;
-			std::cout<<"leftOrRight : "<<leftOrRight<<", quiescence : "<<cellInfoVecs.growthProgress[cellRank]<<std::endl;
 		}
+		else if (cellInfoVecs.cellSubdomainIndx[cellRank] == 1){
+			cellInfoVecs.growthProgress[cellRank] = quiescence3_half;
+		}
+		else if (cellInfoVecs.cellSubdomainIndx[cellRank] == 2){
+			cellInfoVecs.growthProgress[cellRank] = quiescence3;
+		}
+		//ChangesMadeByKT_begin
+
+		// double leftOrRight = cellInfoVecs.centerCoordX[31]*cellInfoVecs.centerCoordY[cellRank] - cellInfoVecs.centerCoordY[31]*cellInfoVecs.centerCoordX[cellRank];
+		// if (leftOrRight >= 0){
+		// 	cellInfoVecs.growthProgress[cellRank] = quiescence3_half;//quiescence3*0.5;
+		// 	std::cout<<"leftOrRight : "<<leftOrRight<<", quiescence : "<<cellInfoVecs.growthProgress[cellRank]<<std::endl;
+		// }
+		// else{
+		// 	cellInfoVecs.growthProgress[cellRank] = quiescence3;
+		// 	std::cout<<"leftOrRight : "<<leftOrRight<<", quiescence : "<<cellInfoVecs.growthProgress[cellRank]<<std::endl;
+		// }
 		for (int i = cellRank*allocPara_m.maxAllNodePerCell; i < (cellRank+1)*allocPara_m.maxAllNodePerCell; i++){
 			nodes->getInfoVecs().quiescencePerNode[i] = cellInfoVecs.growthProgress[cellRank];//quiescence3;
 		}

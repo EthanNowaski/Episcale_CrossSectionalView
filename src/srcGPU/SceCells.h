@@ -4229,8 +4229,9 @@ struct CellInfoVecs {
 	 * progress == 0 means recently divided
 	 * progress == 1 means ready to divide
 	 */
-
-
+	//ChangesMadeByKT_begin
+	thrust::device_vector<int> cellSubdomainIndx;
+	//ChangesMadeByKT_end
 	thrust::device_vector<int> daughterCellProduced;
 
 	thrust::device_vector<double> distFromBasalLoc;
