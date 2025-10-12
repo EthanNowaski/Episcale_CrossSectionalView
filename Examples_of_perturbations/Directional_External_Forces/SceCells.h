@@ -1142,11 +1142,13 @@ struct AddExtForces: public thrust::binary_function<TDD, int, CVec4> {
 
 		// Calculate cell rank from node index and max nodes per cell
 		int cellRank = nodeIndex / _maxAllNodePerCell;
-		
+
+		// Right Boundary Cells
 		if (_cellSubdomainIndx[cellRank] == 3) {
 			fX = -0.1;
 			fY = -0.1;
 		}
+		// Left Boundary Cells
 		else if (_cellSubdomainIndx[cellRank] == 4) {
 			fX = 0.1;
 			fY = -0.1;
