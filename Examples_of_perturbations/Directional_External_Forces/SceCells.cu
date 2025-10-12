@@ -2682,7 +2682,7 @@ growthProgressReinitialize.push_back(   -9999.9);//Cell62
 
 
 	// Ethan's Edits: Adding External Forces to Boundary Cells to Simulate Stretching
-	ApplyExtForces() ; // now for single cell stretching
+	ApplyExtForces() ; 
 	//computeContractileRingForces() ; 
 
 
@@ -4411,7 +4411,7 @@ void SceCells::moveNodes_BC_M() {
 
 void SceCells::ApplyExtForces()
 { 
-	cout << " Applying external forces to nodes at time " << curTime << endl ;
+	// cout << " Applying external forces to nodes at time " << curTime << endl ;
 
 	totalNodeCountForActiveCells = allocPara_m.currentActiveCellCount
 			* allocPara_m.maxAllNodePerCell;
