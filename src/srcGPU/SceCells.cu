@@ -1557,59 +1557,6 @@ void SceCells::runAllCellLogicsDisc_M(double & dt, double Damp_Coef, double Init
 // 	std::cout<<"timeRatio = "<<timeRatio<<std::endl;
 // }
 
-	// if (cycle < 0){
-	// 	divAuxData.cellRank_division = -1;
-	// 	divAuxData.cellRank_division2 = -1;//allocPara_m.currentActiveCellCount;
-	// }
-	// else if (cycle >= 10){
-	// 	divAuxData.cellRank_division = -1;
-	// 	divAuxData.cellRank_division2 = -1;//allocPara_m.currentActiveCellCount;
-	// }
-
-	// if (cycle == 0 && timeRatio < timeRatio_Crit_Division){
-	// 	divAuxData.cellRank_division = 31;
-	// 	divAuxData.cellRank_division2 = allocPara_m.currentActiveCellCount;
-	// }
-	// else if (cycle == 1 && timeRatio < timeRatio_Crit_Division){
-	// 	divAuxData.cellRank_division = 25;//33;
-	// 	divAuxData.cellRank_division2 = allocPara_m.currentActiveCellCount;
-	// }
-	// else if (cycle == 2 && timeRatio < timeRatio_Crit_Division){
-	// 	divAuxData.cellRank_division = 6;//27;
-	// 	divAuxData.cellRank_division2 = allocPara_m.currentActiveCellCount;
-	// }
-	// else if (cycle == 3 && timeRatio < timeRatio_Crit_Division){
-	// 	divAuxData.cellRank_division = 10;//29;
-	// 	divAuxData.cellRank_division2 = allocPara_m.currentActiveCellCount;
-	// }
-	// else if (cycle == 4 && timeRatio < timeRatio_Crit_Division){
-	// 	divAuxData.cellRank_division = 61;//35;
-	// 	divAuxData.cellRank_division2 = allocPara_m.currentActiveCellCount;
-	// }
-	// else if (cycle == 5 && timeRatio < timeRatio_Crit_Division){
-	// 	divAuxData.cellRank_division = 30;//86;
-	// 	divAuxData.cellRank_division2 = allocPara_m.currentActiveCellCount;
-	// }
-	// else if (cycle == 6 && timeRatio < timeRatio_Crit_Division){
-	// 	divAuxData.cellRank_division = 87;
-	// 	divAuxData.cellRank_division2 = allocPara_m.currentActiveCellCount;
-	// }
-	// else if (cycle == 7 && timeRatio < timeRatio_Crit_Division){
-	// 	divAuxData.cellRank_division = 5;//88;
-	// 	divAuxData.cellRank_division2 = allocPara_m.currentActiveCellCount;
-	// }
-	// else if (cycle == 8 && timeRatio < timeRatio_Crit_Division){
-	// 	divAuxData.cellRank_division = 42;//89;
-	// 	divAuxData.cellRank_division2 = allocPara_m.currentActiveCellCount;
-	// }
-	// else if (cycle == 9 && timeRatio < timeRatio_Crit_Division){
-	// 	divAuxData.cellRank_division = 37;//90;
-	// 	divAuxData.cellRank_division2 = allocPara_m.currentActiveCellCount;
-	// }
-	// else{
-	// 	divAuxData.cellRank_division = -1;
-	// 	divAuxData.cellRank_division2 = -1;//allocPara_m.currentActiveCellCount;
-	// }
 
 #ifdef debugModeECM 
 	cudaEvent_t start1, start2, start3, start4, start5, start6, start7, start8, start9, start10, start11, start12, start13, stop;
