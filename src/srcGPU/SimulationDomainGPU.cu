@@ -260,9 +260,12 @@ void SimulationDomainGPU::outputVtkFilesWithCri_M(std::string scriptNameBase,
 
 void SimulationDomainGPU::outputVtkGivenCellColor(std::string scriptNameBase,
 		int rank, AnimationCriteria aniCri, std::vector<double>& cellColorVal,std::vector<double>& cellsPerimeter) {
+	// Creating buckets connections for determining pairs
 	nodes.prepareSceForceComputation();
+	// Looping through membrane nodes, internal nodes, and the pairs to prepare data
 	AniRawData rawAni = cells.obtainAniRawDataGivenCellColor(cellColorVal,
-			aniCri,cellsPerimeter); //AliE
+			aniCri,cellsPerimeter); 
+	// Preparing raw data for vtk file ordering to output
 	VtkAnimationData aniData = cells.outputVtkData(rawAni, aniCri);
 	aniData.outputVtkAni(scriptNameBase, rank);
 }
