@@ -3740,9 +3740,17 @@ void SceCells::moveNodes_BC_M() {
 
 
 void SceCells::ApplyExtForces()
-{ 
+{
+	 	if (curTime == 100000) {
+		cout << " Applying external forces to nodes at time " << curTime << endl ;
+	}
 	totalNodeCountForActiveCells = allocPara_m.currentActiveCellCount
 			* allocPara_m.maxAllNodePerCell;
+
+	//ChangesMadeByEthan_begin
+	int* cellSubdomainIndx = thrust::raw_pointer_cast(
+			&(cellInfoVecs.cellSubdomainIndx[0]));	
+	//ChangesMadeByEthan_end
 
 //for (int i=0 ; i <nodes->getInfoVecs().memNodeType1.size(); i++ ) { 
 //	if (nodes->getInfoVecs().memNodeType1[i]==basal1) {
@@ -3762,13 +3770,14 @@ void SceCells::ApplyExtForces()
 							nodes->getInfoVecs().nodeVelX.begin(),
 							nodes->getInfoVecs().nodeVelY.begin()))
 					+ totalNodeCountForActiveCells,
+			thrust::counting_iterator<int>(0),
 			thrust::make_zip_iterator(
 					thrust::make_tuple(
 							nodes->getInfoVecs().nodeVelX.begin(),
 							nodes->getInfoVecs().nodeVelY.begin(),
 							nodes->getInfoVecs().nodeExtForceX.begin(),
 							nodes->getInfoVecs().nodeExtForceY.begin())),
-			AddExtForces(curTime));
+			AddExtForces(curTime, cellSubdomainIndx, allocPara_m.maxAllNodePerCell));  //ChangesMadeByEthan
 //for (int i=0 ; i <nodes->getInfoVecs().memNodeType1.size(); i++ ) { 
 //	if (nodes->getInfoVecs().memNodeType1[i]==basal1) {
 //		cout << "  I am a basal node with id="<< i << " and vx is equal to " <<nodes->getInfoVecs().nodeVelX[i]  << endl ; 
@@ -3776,7 +3785,6 @@ void SceCells::ApplyExtForces()
 //}
 
 }
-
 
 
 
