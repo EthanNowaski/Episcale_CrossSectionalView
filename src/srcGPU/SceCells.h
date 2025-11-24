@@ -1121,35 +1121,53 @@ struct CalMembrEnergy: public thrust::unary_function<DUiUiUiDD, CVec2> {
 
 
 
-struct AddExtForces: public thrust::unary_function<TDD, CVec4> {
+struct AddExtForces: public thrust::binary_function<TDD, int, CVec4> {
 
-	double _curTime ; 
+	double _curTime;
+	int* _cellSubdomainIndx;
+	int _maxAllNodePerCell;
 
 	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
-	__host__ __device__ AddExtForces(double curTime) :
-			_curTime(curTime) {
+	__host__ __device__ AddExtForces(double curTime, int* cellSubdomainIndx, int maxAllNodePerCell) :
+			_curTime(curTime), _cellSubdomainIndx(cellSubdomainIndx), _maxAllNodePerCell(maxAllNodePerCell) {
 	}
 	// comment prevents bad formatting issues of __host__ and __device__ in Nsight
-	__device__ CVec4 operator()(const TDD &tDD) const {
+	__device__ CVec4 operator()(const TDD &tDD, int nodeIndex) const {
 
 		MembraneType1 memNodeType = thrust::get<0>(tDD);
 		double velX = thrust::get<1>(tDD);
 		double velY = thrust::get<2>(tDD);
-		double tranT=500 ;
-		double fX=0 ; 
-		double fY=0 ;
-		if (memNodeType==basal1)  {
-			fX=CalExtForce(max(_curTime-tranT,0.0)) ;
-			velY=0 ; //gripping handles for stretch test won't allow motion in y direction 
-		}
-		if (memNodeType==apical1) {
-			fX= -CalExtForce(max(_curTime-tranT,0.0))  ; 
-			velY=0 ; //gripping handles for stretch test won't allow motion in y direction 
-		}
-		return thrust::make_tuple(velX+fX, velY+fY,fX,fY);
-		}
-}; 
+		double fX = 0.0;
+		double fY = 0.0;
 
+		// Calculate cell rank from node index and max nodes per cell
+		int cellRank = nodeIndex / _maxAllNodePerCell;
+		//First half of simulation
+		// if (_curTime < 100000){
+			if (_cellSubdomainIndx[cellRank] == 3) {
+				fX = -1.5;
+				fY = 0.0;
+			}
+			else if (_cellSubdomainIndx[cellRank] == 4) {
+				fX = 1.5;
+				fY = 0.0;
+			}
+		// }
+		// Second half of simulation
+		// else if (_curTime > 100000){
+		// 	if (_cellSubdomainIndx[cellRank] == 3) {
+		// 		fX = 0.0;
+		// 		fY = 1.0;
+		// 	}
+		// 	else if (_cellSubdomainIndx[cellRank] == 4) {
+		// 		fX = 0.0;
+		// 		fY = -1.0;
+		// 	}
+		// }
+
+		return thrust::make_tuple(velX + fX, velY + fY, fX, fY);
+	}
+}; 
 
 
 
