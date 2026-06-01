@@ -1145,12 +1145,12 @@ struct AddExtForces: public thrust::binary_function<TDD, int, CVec4> {
 		//First half of simulation
 		// if (_curTime < 100000){
 			if (_cellSubdomainIndx[cellRank] == 3) {
-				fX = -1.5;
-				fY = 0.0;
+				fX = -1.0;
+				fY = -0.5;
 			}
 			else if (_cellSubdomainIndx[cellRank] == 4) {
-				fX = 1.5;
-				fY = 0.0;
+				fX = 1.0;
+				fY = -0.5;
 			}
 		// }
 		// Second half of simulation
