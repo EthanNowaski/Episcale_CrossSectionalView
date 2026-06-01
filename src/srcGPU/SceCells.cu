@@ -2316,7 +2316,6 @@ growthProgressReinitialize.push_back(   -9999.9);//Cell62
 	// }
 	// std::cout << "     *** 16 ***" << endl;
  
-	//ChangesMadeByKT_begin
 	//Here I am setting the initial columnar cells into three section. In this way the tissue is composed of a medial domain and 2 lateral domains.
 	//The current setup is that 0: anterior, 1: medial, 2: posterior such that 0 and 2 are the 2 lateral domains.
 	//For simplicify, we will assume that any daughter cell will inherit the same "subdomain" belonging as mother cell's assignment.
@@ -2331,9 +2330,16 @@ growthProgressReinitialize.push_back(   -9999.9);//Cell62
 			else if (i >= 42 && i < 63){
 				cellInfoVecs.cellSubdomainIndx[i] = 2;
 			}
+			// Right boundary cells
+			if (i >=64 && i < 69){
+				cellInfoVecs.cellSubdomainIndx[i] = 3;
+			}
+			// Left boundary cells
+			if (i >= 79 && i < 85){
+				cellInfoVecs.cellSubdomainIndx[i] = 4;
+			}
 		}
 	}
-	//ChangesMadeByKT_end
 
     relaxCount=relaxCount+1 ; 
 	// std::cout << "     *** 17 ***" << endl;
