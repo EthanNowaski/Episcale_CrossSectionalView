@@ -2935,6 +2935,32 @@ void SceNodes::sceForcesDisc_M(double timeRatio, double timeRatio_Crit_Division,
 	if (timeRatio == 0 && cycle <= 0){
 		// std::cout<<"Setting the anisotropic contractility profile"<<std::endl;
 		// std::cout<<"This message should only appear once, if more than once is shown, something is wrong!"<<std::endl;
+		// Assign cell subdomains based on cell ID (Also done in SceCells.cu)
+		// Subdomain 0: Dorsal lateral cells (2-20)
+		// Subdomain 1: medial cells (21-41)
+		// Subdomain 2: Ventral lateral cells (42-62)
+		// Subdomain 3: right boundary cells (64-68)
+		// Subdomain 4: left boundary cells (79-84)
+		for (int i = 0; i < allocPara_M.currentActiveCellCount; i++){
+			if (i > 1 && i < 21){
+				cellsSceNodes->getCellInfoVecs().cellSubdomainIndx[i] = 0;
+			}
+			else if (i >= 21 && i < 42){
+				cellsSceNodes->getCellInfoVecs().cellSubdomainIndx[i] = 1;
+			}
+			else if (i >= 42 && i < 63){
+				cellsSceNodes->getCellInfoVecs().cellSubdomainIndx[i] = 2;
+			}
+			// Right boundary cells
+			if (i >= 64 && i < 69){
+				cellsSceNodes->getCellInfoVecs().cellSubdomainIndx[i] = 3;
+			}
+			// Left boundary cells
+			if (i >= 79 && i < 85){
+				cellsSceNodes->getCellInfoVecs().cellSubdomainIndx[i] = 4;
+			}
+		}
+		std::cout<<"Cell subdomain assignments initialized in SceNodes."<<std::endl;
 
 		for (int i = 0; i < allocPara_M.maxTotalNodeCount; i++){
 			uint cellRank = i/allocPara_M.maxAllNodePerCell;
@@ -3006,6 +3032,7 @@ void SceNodes::sceForcesDisc_M(double timeRatio, double timeRatio_Crit_Division,
 			std::cout<<"basal actomyo contractility for cell["<<i<<"] : "<<cellsSceNodes->getCellInfoVecs().contractActomyo_multip_perCell[i] <<std::endl;
 			std::cout<<"apical actomyo contractility for cell["<<i<<"] : "<<cellsSceNodes->getCellInfoVecs().contractActomyo_multip_apical_perCell[i]<<std::endl;
 		}
+		
 	}
 	// cout << " confirm--- 2 ---" << endl;
 	cout.flush();
@@ -3372,6 +3399,8 @@ void SceNodes::applyMembrAdh_M() {
 	double* nodeGrowProAddr = thrust::raw_pointer_cast(&infoVecs.nodeGrowPro[0]);
 	int* nodeAdhAddr = thrust::raw_pointer_cast(&infoVecs.nodeAdhereIndex[0]);
 	double* nodedppLevelAddr = thrust::raw_pointer_cast(&infoVecs.dppLevel[0]);
+	int* subdomainAddr = thrust::raw_pointer_cast(
+			&(cellsSceNodes->getCellInfoVecs().cellSubdomainIndx[0]));
 	//thrust::counting_iterator<uint> iBegin_node(0); 
     // cout << " Apical adhesion is " << isApicalAdhPresent << endl ;
 	thrust::transform(
@@ -3390,7 +3419,7 @@ void SceNodes::applyMembrAdh_M() {
 			thrust::make_zip_iterator(
 					thrust::make_tuple(infoVecs.nodeVelX.begin(),
 							infoVecs.nodeVelY.begin())),
-			ApplyAdh(nodeLocXAddress, nodeLocYAddress, nodeGrowProAddr,nodeAdhAddr,nodedppLevelAddr,isApicalAdhPresent));
+			ApplyAdh(nodeLocXAddress, nodeLocYAddress, nodeGrowProAddr,nodeAdhAddr,nodedppLevelAddr,isApicalAdhPresent,subdomainAddr));
 		
 		//for (int i=0 ; i<140 ; i++){
 		//	cout <<"adhesion index for "<<i << " is "<<infoVecs.nodeAdhereIndex[i]<< endl ; 

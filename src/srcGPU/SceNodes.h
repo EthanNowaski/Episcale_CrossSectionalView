@@ -867,11 +867,12 @@ struct ApplyAdh: public thrust::unary_function<BoolIUiDDT, CVec2> {
 	int* _nodeAdhAddr ;
 	double * _nodeDppAddr ;
 	bool _isApicalAdhPresent ;
+	int* _subdomainAddr ;
 // comment prevents bad formatting issues of __host__ and __device__ in Nsight
 	__host__ __device__
-	ApplyAdh(double* nodeLocXArrAddr, double* nodeLocYArrAddr, double* nodeGrowProAddr, int* nodeAdhAddr , double * nodeDppAddr, bool isApicalAdhPresent) :
+	ApplyAdh(double* nodeLocXArrAddr, double* nodeLocYArrAddr, double* nodeGrowProAddr, int* nodeAdhAddr , double * nodeDppAddr, bool isApicalAdhPresent, int* subdomainAddr) :
 			_nodeLocXArrAddr(nodeLocXArrAddr), _nodeLocYArrAddr(nodeLocYArrAddr), _nodeGrowProAddr(nodeGrowProAddr), _nodeAdhAddr(nodeAdhAddr),
-		    _nodeDppAddr(nodeDppAddr), _isApicalAdhPresent(isApicalAdhPresent) 	{
+		    _nodeDppAddr(nodeDppAddr), _isApicalAdhPresent(isApicalAdhPresent), _subdomainAddr(subdomainAddr) {
 	}
 	__device__
 	CVec2 operator()(const BoolIUiDDT& adhInput) const {
@@ -897,6 +898,17 @@ struct ApplyAdh: public thrust::unary_function<BoolIUiDDT, CVec2> {
 			//beta=0.1* 0.5*( _nodeDppAddr[nodeIndx]+ _nodeDppAddr [adhIndx] ) ; 
 			beta=0.0;   
 		}
+		// Scale beta based on cell subdomain.
+		// Modify subdomainAdhScale values to pattern adhesivity per region:
+		uint cellRank = nodeIndx / allNodeCountPerCell_M;
+		int subdomain = _subdomainAddr[cellRank];
+		double subdomainAdhScale = 1.0;
+		if      (subdomain == 0) subdomainAdhScale = 1.0; // Left lateral
+		else if (subdomain == 1) subdomainAdhScale = 1.0; // medial
+		else if (subdomain == 2) subdomainAdhScale = 1.0; // Right lateral
+		else if (subdomain == 3) subdomainAdhScale = 1.0; // right boundary
+		else if (subdomain == 4) subdomainAdhScale = 1.0; // left boundary
+		beta *= subdomainAdhScale;
 
 		/*int maxNodePerCell=680  ; 
 		int cellRank=nodeIndx/maxNodePerCell ;
