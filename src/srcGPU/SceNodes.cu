@@ -2964,13 +2964,13 @@ void SceNodes::sceForcesDisc_M(double timeRatio, double timeRatio_Crit_Division,
 
 		for (int i = 0; i < allocPara_M.maxTotalNodeCount; i++){
 			uint cellRank = i/allocPara_M.maxAllNodePerCell;
-			if (cellRank >= 2 && cellRank <= 26){
+			if (cellRank >= 2 && cellRank <= 29){
 			// if (cellRank >= 2 && cellRank <= 15){
 				// infoVecs.contractActomyo_multip[i] = pow(contractActomyo_multip[cellRank], 1.0);////1.0;
 				// infoVecs.contractActomyo_multip_apical[i] = pow(contractActomyo_multip_apical[cellRank], 1.0);//0.25;
 				infoVecs.contractActomyo_multip[i] = contractActomyo_multip_perCell1;//pow(contractActomyo_multip[cellRank], 3.0);////1.0;
 				infoVecs.contractActomyo_multip_apical[i] = contractActomyo_multip_perCell_apical1;//0.25;
-				if (i == 2*allocPara_M.maxAllNodePerCell || i == 26*allocPara_M.maxAllNodePerCell){
+				if (i == 2*allocPara_M.maxAllNodePerCell || i == 29*allocPara_M.maxAllNodePerCell){
 					std::cout<<"infoVecs.contractActomyo_multip["<<i<<"] = "<<infoVecs.contractActomyo_multip[i]<<std::endl;
 					std::cout<<"infoVecs.contractActomyo_multip_apical["<<i<<"] = "<<infoVecs.contractActomyo_multip_apical[i]<<std::endl;
 				}
@@ -2979,7 +2979,7 @@ void SceNodes::sceForcesDisc_M(double timeRatio, double timeRatio_Crit_Division,
 				cellsSceNodes->getCellInfoVecs().contractActomyo_multip_perCell[cellRank] = contractActomyo_multip_perCell1;//infoVecs.contractActomyo_multip[i];
 				cellsSceNodes->getCellInfoVecs().contractActomyo_multip_apical_perCell[cellRank] = contractActomyo_multip_perCell_apical1;//0.25;//infoVecs.contractActomyo_multip_apical[i];
 			}
-			else if (cellRank >= 27 && cellRank <= 37){
+			else if (cellRank >= 30 && cellRank <= 34){
 			// else if (cellRank >= 16 && cellRank <= 48){
 				// infoVecs.contractActomyo_multip[i] = pow(contractActomyo_multip[cellRank], 1.0);////1.0;
 				// infoVecs.contractActomyo_multip_apical[i] = pow(contractActomyo_multip_apical[cellRank], 1.0);//0.25;
@@ -2988,7 +2988,7 @@ void SceNodes::sceForcesDisc_M(double timeRatio, double timeRatio_Crit_Division,
 				// if (cellRank >=28 && cellRank <=34){
 				// 	infoVecs.contractActomyo_multip_apical[i] = 2.0;
 				// }
-				if (i == 27*allocPara_M.maxAllNodePerCell || i == 37*allocPara_M.maxAllNodePerCell){
+				if (i == 30*allocPara_M.maxAllNodePerCell || i == 34*allocPara_M.maxAllNodePerCell){
 					std::cout<<"infoVecs.contractActomyo_multip["<<i<<"] = "<<infoVecs.contractActomyo_multip[i]<<std::endl;
 					std::cout<<"infoVecs.contractActomyo_multip_apical["<<i<<"] = "<<infoVecs.contractActomyo_multip_apical[i]<<std::endl;
 				}
@@ -3001,13 +3001,13 @@ void SceNodes::sceForcesDisc_M(double timeRatio, double timeRatio_Crit_Division,
 				// 	cellsSceNodes->getCellInfoVecs().contractActomyo_multip_apical_perCell[cellRank] = contractActomyo_multip_perCell_apical2*1.0;
 				// }
 			}
-			else if (cellRank >= 38 && cellRank <= 62){
+			else if (cellRank >= 35 && cellRank <= 62){
 			// else if (cellRank >= 49 && cellRank <= 62){
 				// infoVecs.contractActomyo_multip[i] = pow(contractActomyo_multip[cellRank], 1.0);////1.0;
 				// infoVecs.contractActomyo_multip_apical[i] = pow(contractActomyo_multip_apical[cellRank], 1.0);//0.25;
 				infoVecs.contractActomyo_multip[i] = contractActomyo_multip_perCell3;//pow(contractActomyo_multip[cellRank], 3.0);//1.0;
 				infoVecs.contractActomyo_multip_apical[i] = contractActomyo_multip_perCell_apical3;//0.25;
-				if (i == 38*allocPara_M.maxAllNodePerCell || i == 62*allocPara_M.maxAllNodePerCell){
+				if (i == 35*allocPara_M.maxAllNodePerCell || i == 62*allocPara_M.maxAllNodePerCell){
 					std::cout<<"infoVecs.contractActomyo_multip["<<i<<"] = "<<infoVecs.contractActomyo_multip[i]<<std::endl;
 					std::cout<<"infoVecs.contractActomyo_multip_apical["<<i<<"] = "<<infoVecs.contractActomyo_multip_apical[i]<<std::endl;
 				}
